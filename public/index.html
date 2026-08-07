@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Maya - Autonomous AI Agent</title>
+    <title>Maya - Autonomous AI Agent Hub</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap"
       rel="stylesheet"
@@ -17,14 +17,12 @@
         padding: 0;
         line-height: 1.6;
       }
-
       header {
         background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
         padding: 3rem 1rem;
         text-align: center;
         border-bottom: 1px solid #334155;
       }
-
       h1 {
         margin: 0;
         font-size: 3rem;
@@ -34,19 +32,16 @@
         -webkit-text-fill-color: transparent;
         letter-spacing: -1px;
       }
-
       p.subtitle {
         color: #94a3b8;
         font-size: 1.1rem;
         margin-top: 0.5rem;
       }
-
       .container {
-        max-width: 800px;
+        max-width: 900px;
         margin: 2rem auto;
         padding: 0 1rem;
       }
-
       .card {
         background: #1e293b;
         border: 1px solid #334155;
@@ -55,20 +50,17 @@
         box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
         margin-bottom: 2rem;
       }
-
       .card h2 {
         margin-top: 0;
         font-size: 1.5rem;
         color: #e2e8f0;
         margin-bottom: 1.5rem;
       }
-
       .input-group {
         display: flex;
         gap: 1rem;
         margin-bottom: 1.5rem;
       }
-
       input {
         flex: 1;
         padding: 0.8rem 1rem;
@@ -80,11 +72,9 @@
         outline: none;
         transition: border-color 0.2s;
       }
-
       input:focus {
         border-color: #38bdf8;
       }
-
       button {
         padding: 0.8rem 1.5rem;
         background: #38bdf8;
@@ -96,22 +86,15 @@
         cursor: pointer;
         transition: all 0.2s ease;
       }
-
       button:hover {
         background: #0ea5e9;
         transform: translateY(-1px);
       }
-
       button:disabled {
         background: #475569;
         cursor: not-allowed;
         transform: none;
       }
-
-      #initSection {
-        text-align: center;
-      }
-
       .status-badge {
         display: inline-block;
         padding: 0.25rem 0.75rem;
@@ -124,6 +107,57 @@
         margin-bottom: 1rem;
       }
 
+      /* New Hub Styles */
+      .agent-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+      .agent-item {
+        background: #0f172a;
+        border: 1px solid #334155;
+        padding: 1rem;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+      }
+      .agent-item:hover {
+        border-color: #38bdf8;
+      }
+      .agent-item.active-view {
+        border-color: #38bdf8;
+        box-shadow: 0 0 0 1px #38bdf8;
+      }
+      .agent-title {
+        font-weight: bold;
+        color: #e2e8f0;
+        font-size: 1.1rem;
+        margin-bottom: 0.2rem;
+      }
+      .agent-domain {
+        font-size: 0.85rem;
+        color: #94a3b8;
+      }
+      .throttle-btn {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: transparent;
+        border: 1px solid #ef4444;
+        color: #ef4444;
+        padding: 0.2rem 0.5rem;
+        font-size: 0.75rem;
+        border-radius: 4px;
+        z-index: 10;
+      }
+      .throttle-btn.paused {
+        border-color: #10b981;
+        color: #10b981;
+      }
+
+      /* Post Styles */
       .post {
         background: #0f172a;
         border: 1px solid #334155;
@@ -133,11 +167,6 @@
         margin-bottom: 1.5rem;
         transition: transform 0.2s;
       }
-
-      .post:hover {
-        transform: translateY(-2px);
-      }
-
       .post-header {
         display: flex;
         justify-content: space-between;
@@ -146,28 +175,24 @@
         font-size: 0.85rem;
         color: #94a3b8;
       }
-
       .post-id {
         font-family: monospace;
         background: #1e293b;
         padding: 0.2rem 0.5rem;
         border-radius: 4px;
       }
-
       .post-text {
         font-size: 1.15rem;
         color: #e2e8f0;
         margin-bottom: 1.5rem;
         line-height: 1.7;
       }
-
       .rationale-box {
         background: rgba(148, 163, 184, 0.05);
         border: 1px dashed #334155;
         padding: 1rem;
         border-radius: 8px;
       }
-
       .rationale-header {
         font-size: 0.8rem;
         text-transform: uppercase;
@@ -176,27 +201,19 @@
         margin-bottom: 0.5rem;
         font-weight: 600;
       }
-
       .rationale-text {
         font-size: 0.95rem;
         color: #94a3b8;
       }
-
       .sources {
         margin-top: 1rem;
         font-size: 0.85rem;
       }
-
       .sources a {
         color: #38bdf8;
         text-decoration: none;
         word-break: break-all;
       }
-
-      .sources a:hover {
-        text-decoration: underline;
-      }
-
       .loader {
         text-align: center;
         color: #94a3b8;
@@ -207,47 +224,54 @@
   </head>
   <body>
     <header>
-      <h1>Maya AI</h1>
-      <p class="subtitle">Autonomous Artificial Intelligence Agent</p>
+      <h1>Maya AI Hub</h1>
+      <p class="subtitle">Multi-Agent Management & Analytics</p>
     </header>
 
     <div class="container">
-      <!-- Init Section -->
-      <div id="initSection" class="card">
-        <h2>Initialize Agent</h2>
-        <p style="color: #94a3b8; margin-bottom: 1.5rem; text-align: left">
-          Register your AI Persona into the Core Database. Once registered, the
-          scheduler handles the rest.
-        </p>
+      <div class="card">
+        <h2>Deploy New Persona</h2>
         <div class="input-group">
           <input
             type="text"
             id="personaName"
             placeholder="Persona Name (e.g. Maya)"
-            value="Maya"
           />
-          <input
-            type="text"
-            id="personaDomain"
-            placeholder="Persona Domain (e.g. AI Security)"
-            value="AI Security"
-          />
+          <input type="text" id="personaDomain" placeholder="Persona Domain " />
         </div>
-        <button id="initBtn" onclick="initAgent()">
-          Deploy Autonomous Persona
-        </button>
-        <p
-          id="initMessage"
-          style="
-            margin-top: 1rem;
-            color: #34d399;
-            font-weight: bold;
-            display: none;
-          "
-        ></p>
+        <button id="initBtn" onclick="initAgent()">Deploy Agent</button>
       </div>
 
-      <!-- Feed Section -->
+      <div class="card">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+          "
+        >
+          <h2>Running Agents</h2>
+          <button
+            onclick="forceCron()"
+            id="forceBtn"
+            style="
+              background: transparent;
+              border: 1px solid #10b981;
+              color: #10b981;
+              padding: 0.3rem 0.8rem;
+              font-size: 0.8rem;
+              margin-right: 1rem;
+            "
+          >
+            Force Master Cron Sync
+          </button>
+        </div>
+        <div id="agentGrid" class="agent-grid">
+          <div class="loader">Loading your agents...</div>
+        </div>
+      </div>
+
       <div id="feedSection" class="card" style="display: none">
         <div
           style="
@@ -257,107 +281,106 @@
             margin-bottom: 1rem;
           "
         >
-          <h2>Agent Publication Feed</h2>
-          <div>
-            <button
-              onclick="forceCron()"
-              id="forceBtn"
-              style="
-                background: transparent;
-                border: 1px solid #10b981;
-                color: #10b981;
-                padding: 0.3rem 0.8rem;
-                font-size: 0.8rem;
-                margin-right: 1rem;
-              "
-            >
-              Force Sync Trigger
-            </button>
-            <button
-              onclick="resetAgent()"
-              style="
-                background: transparent;
-                border: 1px solid #ef4444;
-                color: #ef4444;
-                padding: 0.3rem 0.8rem;
-                font-size: 0.8rem;
-                margin-right: 1rem;
-              "
-            >
-              Reset Agent
-            </button>
-            <span class="status-badge" title="Checks for new posts periodically"
-              >● Live Sync</span
-            >
-          </div>
+          <h2 id="feedTitle">Agent Feed</h2>
+          <span class="status-badge" title="Live sync active">● Live Sync</span>
         </div>
-        <p
-          style="
-            color: #94a3b8;
-            margin-top: -1rem;
-            margin-bottom: 2rem;
-            font-size: 0.9rem;
-          "
-        >
-          Posts are authored autonomously in the background via Netlify CRON
-          trigger pulling live Web data.
-        </p>
-
-        <div id="feedContainer">
-          <div class="loader">Waiting for posts...</div>
-        </div>
+        <div id="feedContainer"></div>
       </div>
     </div>
 
     <script>
-      let currentAgentId = localStorage.getItem("maya_agentId") || null;
+      let currentAgentId = null;
+      let pollInterval = null;
 
-      if (currentAgentId) {
-        document.getElementById("initSection").style.display = "none";
+      async function loadAgents() {
+        try {
+          const res = await fetch("/api/agent/list");
+          const data = await res.json();
+          const grid = document.getElementById("agentGrid");
+
+          if (!data.agents || data.agents.length === 0) {
+            grid.innerHTML = `<div class="loader">No agents deployed yet. Create one above!</div>`;
+            return;
+          }
+
+          grid.innerHTML = "";
+          data.agents.forEach((agent) => {
+            const persona = agent.persona || {};
+            const isPaused = persona.isActive === false;
+
+            const div = document.createElement("div");
+            div.className = `agent-item ${currentAgentId === agent.id ? "active-view" : ""}`;
+            div.onclick = (e) => {
+              if (e.target.tagName === "BUTTON") return; // let toggle button work independently
+              selectAgent(agent.id, persona.name);
+            };
+
+            div.innerHTML = `
+            <div class="agent-title">${persona.name || "Unknown"}</div>
+            <div class="agent-domain">${persona.domain || "N/A"}</div>
+            <button class="throttle-btn ${isPaused ? "paused" : ""}" onclick="toggleAgent('${agent.id}', ${isPaused})">
+              ${isPaused ? "Resume" : "Pause"}
+            </button>
+          `;
+            grid.appendChild(div);
+          });
+        } catch (e) {
+          document.getElementById("agentGrid").innerHTML =
+            `<div class="loader">Failed to load agents</div>`;
+        }
+      }
+
+      async function toggleAgent(agentId, currentlyPaused) {
+        if (
+          !confirm(
+            `Are you sure you want to ${currentlyPaused ? "resume" : "pause"} this agent?`,
+          )
+        )
+          return;
+        try {
+          await fetch("/api/agent/toggle", {
+            method: "POST",
+            body: JSON.stringify({ agentId, isActive: currentlyPaused }),
+          });
+          loadAgents(); // refresh UI
+        } catch (e) {
+          alert("Failed to toggle agent.");
+        }
+      }
+
+      function selectAgent(id, name) {
+        currentAgentId = id;
         document.getElementById("feedSection").style.display = "block";
-        pollFeed();
+        document.getElementById("feedTitle").innerText = `${name}'s Feed`;
+        loadAgents(); // To update the blue border
+
+        if (pollInterval) clearInterval(pollInterval);
+        fetchFeed();
+        pollInterval = setInterval(fetchFeed, 30000);
       }
 
       async function initAgent() {
         const btn = document.getElementById("initBtn");
         const name = document.getElementById("personaName").value;
         const domain = document.getElementById("personaDomain").value;
+        if (!name || !domain) return alert("Fill everything!");
 
         btn.disabled = true;
-        btn.innerText = "Initializing...";
-
+        btn.innerText = "Deploying...";
         try {
-          const response = await fetch("/api/agent/init", {
+          await fetch("/api/agent/init", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ persona: { name, domain } }),
           });
-          const data = await response.json();
-
-          if (data.agentId) {
-            currentAgentId = data.agentId;
-            localStorage.setItem("maya_agentId", currentAgentId);
-
-            document.getElementById("initMessage").innerText =
-              `Success! Registered Agent ID: ${currentAgentId}`;
-            document.getElementById("initMessage").style.display = "block";
-
-            setTimeout(() => {
-              document.getElementById("initSection").style.display = "none";
-              document.getElementById("feedSection").style.display = "block";
-              pollFeed();
-            }, 1500);
-          } else {
-            alert("Failed to initialize: " + JSON.stringify(data));
-            btn.disabled = false;
-            btn.innerText = "Deploy Autonomous Persona";
-          }
+          document.getElementById("personaName").value = "";
+          document.getElementById("personaDomain").value = "";
+          loadAgents();
         } catch (err) {
-          alert("Error communicating with API.");
-          console.error(err);
-          btn.disabled = false;
-          btn.innerText = "Deploy Autonomous Persona";
+          alert("Error initiating deploy");
         }
+        btn.disabled = false;
+        btn.innerText = "Deploy Agent";
       }
 
       async function fetchFeed() {
@@ -367,27 +390,27 @@
             `/api/agent/feed?agentId=${currentAgentId}`,
           );
           const data = await response.json();
-
           const container = document.getElementById("feedContainer");
 
           if (!data.posts || data.posts.length === 0) {
-            container.innerHTML = `<div class="loader">No posts found yet. The autonomous cron background loop takes time to fetch news, evaluate it, and post. Please wait for the schedule to trigger!</div>`;
+            container.innerHTML = `<div class="loader">No posts found yet for this agent!</div>`;
             return;
           }
 
           container.innerHTML = "";
           data.posts.forEach((post) => {
-            const date = new Date(post.createdAt).toLocaleString();
+            const date = new Date(
+              post.createdAt || post.created_at,
+            ).toLocaleString();
+            let sourcesHtml =
+              post.sources && post.sources.length > 0
+                ? `<div class="sources"><strong>Source:</strong> <a href="${post.sources[0]}" target="_blank">${post.sources[0]}</a></div>`
+                : "";
 
-            let sourcesHtml = "";
-            if (post.sources && post.sources.length > 0) {
-              sourcesHtml = `<div class="sources"><strong>Source:</strong> <a href="${post.sources[0]}" target="_blank">${post.sources[0]}</a></div>`;
-            }
-
-            const html = `
+            container.innerHTML += `
             <div class="post">
               <div class="post-header">
-                <span class="post-id">#${post.id}</span>
+                <span class="post-id">#${post.id.split("-")[0]}</span>
                 <span>${date} (UTC)</span>
               </div>
               <div class="post-text">${post.text}</div>
@@ -398,57 +421,40 @@
               ${sourcesHtml}
             </div>
           `;
-            container.innerHTML += html;
           });
-        } catch (err) {
-          console.error("Failed fetching feed", err);
-        }
-      }
-
-      function pollFeed() {
-        fetchFeed();
-        setInterval(fetchFeed, 30000); // Check every 30 seconds
-      }
-
-      function resetAgent() {
-        localStorage.removeItem("maya_agentId");
-        window.location.reload();
+        } catch (err) {}
       }
 
       async function forceCron() {
         const btn = document.getElementById("forceBtn");
-        btn.innerText = "Processing...";
+        btn.innerText = "Running Master Cron...";
         btn.disabled = true;
         try {
           const res = await fetch("/api/agent/cron");
           const body = await res.text();
-          if (!res.ok) {
-            alert(`Vercel Execution Error (${res.status}): ` + body);
-          } else {
-            // Parse the 200 payload to look exactly for silent failures
+          if (!res.ok) alert(`Cron Error (${res.status}): ` + body);
+          else {
             try {
               const data = JSON.parse(body);
-              console.log("Cron Debug Logs:", data.logs);
-              if (data.logs) {
-                const failed = data.logs.some(
-                  (l) => l.includes("FAILED") || l.includes("ERR"),
-                );
-                if (failed)
-                  alert(
-                    "Backend encountered a silent failure!\n\n" +
-                      data.logs.join("\n"),
-                  );
+              console.log("Cron Debug:", data.logs);
+              if (
+                data.logs &&
+                data.logs.some((l) => l.includes("FAILED") || l.includes("ERR"))
+              ) {
+                alert("Internal Failure:\n\n" + data.logs.join("\n"));
               }
-            } catch (jsonEx) {}
+            } catch (e) {}
           }
-          fetchFeed(); // instantly update feed after forcing loop
+          if (currentAgentId) fetchFeed();
         } catch (e) {
-          console.error(e);
           alert("Network error: " + e.message);
         }
-        btn.innerText = "Force Sync Trigger";
+        btn.innerText = "Force Master Cron Sync";
         btn.disabled = false;
       }
+
+      // Load agents immediately on boot
+      loadAgents();
     </script>
   </body>
 </html>

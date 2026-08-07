@@ -32,8 +32,9 @@ module.exports = async (req, res) => {
     await Promise.allSettled(
       agents.map(async (agent) => {
         try {
-          debugLogs.push(`Starting agent ${agent.id}`);
           const persona = agent.persona || {};
+          if (persona.isActive === false) return; // SKIP PAUSED AGENTS
+          debugLogs.push(`Starting agent ${agent.id}`);
           const domain = persona.domain || "Technology";
 
           debugLogs.push(`Searching Tavily for ${domain}...`);
