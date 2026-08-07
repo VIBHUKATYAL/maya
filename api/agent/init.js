@@ -19,12 +19,10 @@ module.exports = async (req, res) => {
     const { persona } = req.body || {};
 
     if (!persona || !persona.name || !persona.domain) {
-      return res
-        .status(400)
-        .json({
-          error:
-            'Bad Request: "persona" object with "name" and "domain" is required.',
-        });
+      return res.status(400).json({
+        error:
+          'Bad Request: "persona" object with "name" and "domain" is required.',
+      });
     }
 
     const { SUPABASE_URL, SUPABASE_KEY, GEMINI_API_KEY, TAVILY_API_KEY } =
@@ -55,34 +53,30 @@ module.exports = async (req, res) => {
       const prompt = `### ROLE ###\nYou are an autonomous AI content creator. Your persona:\n- Name: ${persona.name}\n- Domain/Focus: ${persona.domain}\n\n### TASK ###\nReview these live news articles and decide whether to publish a post. ONLY publish if highly relevant. REJECT generic topics.\n\n### LIVE NEWS SOURCES ###\n${newsContext}\n\n### OUTPUT FORMAT ###\nYou MUST output valid, raw JSON exactly matching this structure. \n{\n  "decision": "PUBLISH" | "REJECT",\n  "text": "The actual post content written in your persona's voice (if PUBLISH).",\n  "rationale": "Why you chose to publish or reject these topics.",\n  "sources": ["URL1", "URL2"]\n}`;
 
       const model = genAI.getGenerativeModel({
-        model: "gemini-1.5-flash",
+        model: "gemini-2.5-flash",
         generationConfig: { responseMimeType: "application/json" },
       });
       const result = await model.generateContent(prompt);
       const llmOutput = JSON.parse(result.response.text().trim());
 
       if (llmOutput.decision === "PUBLISH") {
-        const { error: insertError } = await supabase
-          .from("Posts")
-          .insert([
+        const { error: insertError } = await supabase.from("Posts").insert([
+          {
+            agent_id: agentId,
+            text: llmOutput.text,
+            rationale: llmOutput.rationale,
+            sources: llmOutput.sources || [],
+          },
+        ]);
+        if (insertError)
+          await supabase.from("Posts").insert([
             {
-              agent_id: agentId,
+              agentId,
               text: llmOutput.text,
               rationale: llmOutput.rationale,
               sources: llmOutput.sources || [],
             },
           ]);
-        if (insertError)
-          await supabase
-            .from("Posts")
-            .insert([
-              {
-                agentId,
-                text: llmOutput.text,
-                rationale: llmOutput.rationale,
-                sources: llmOutput.sources || [],
-              },
-            ]);
       }
     } catch (e) {
       console.error("Failed to generate instant post:", e);
