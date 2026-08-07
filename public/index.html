@@ -258,9 +258,24 @@
           "
         >
           <h2>Agent Publication Feed</h2>
-          <span class="status-badge" title="Checks for new posts periodically"
-            >● Live Sync</span
-          >
+          <div>
+            <button
+              onclick="resetAgent()"
+              style="
+                background: transparent;
+                border: 1px solid #ef4444;
+                color: #ef4444;
+                padding: 0.3rem 0.8rem;
+                font-size: 0.8rem;
+                margin-right: 1rem;
+              "
+            >
+              Reset Agent
+            </button>
+            <span class="status-badge" title="Checks for new posts periodically"
+              >● Live Sync</span
+            >
+          </div>
         </div>
         <p
           style="
@@ -379,6 +394,11 @@
       function pollFeed() {
         fetchFeed();
         setInterval(fetchFeed, 30000); // Check every 30 seconds
+      }
+
+      function resetAgent() {
+        localStorage.removeItem("maya_agentId");
+        window.location.reload();
       }
     </script>
   </body>
