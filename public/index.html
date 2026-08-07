@@ -318,9 +318,14 @@
             div.innerHTML = `
             <div class="agent-title">${persona.name || "Unknown"}</div>
             <div class="agent-domain">${persona.domain || "N/A"}</div>
-            <button class="throttle-btn ${isPaused ? "paused" : ""}" onclick="toggleAgent('${agent.id}', ${isPaused})">
-              ${isPaused ? "Resume" : "Pause"}
-            </button>
+            <div style="position: absolute; top: 1rem; right: 1rem; display: flex; gap: 0.5rem; z-index: 10;">
+                <button class="throttle-btn ${isPaused ? "paused" : ""}" style="position: static;" onclick="toggleAgent('${agent.id}', ${isPaused})">
+                  ${isPaused ? "Resume" : "Pause"}
+                </button>
+                <button class="throttle-btn" style="position: static; color: #f43f5e; border-color: #f43f5e" onclick="deleteAgent('${agent.id}')">
+                  Delete
+                </button>
+            </div>
           `;
             grid.appendChild(div);
           });
@@ -345,6 +350,28 @@
           loadAgents(); // refresh UI
         } catch (e) {
           alert("Failed to toggle agent.");
+        }
+      }
+
+      async function deleteAgent(agentId) {
+        if (
+          !confirm(
+            `WARNING: Are you absolutely sure you want to PERMANENTLY DELETE this agent and all of its posts?`,
+          )
+        )
+          return;
+        try {
+          await fetch("/api/agent/delete", {
+            method: "POST",
+            body: JSON.stringify({ agentId }),
+          });
+          if (currentAgentId === agentId) {
+            currentAgentId = null;
+            document.getElementById("feedSection").style.display = "none";
+          }
+          loadAgents();
+        } catch (e) {
+          alert("Failed to delete agent.");
         }
       }
 
