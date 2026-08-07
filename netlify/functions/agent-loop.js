@@ -3,7 +3,7 @@ const { createClient } = require("@supabase/supabase-js");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { tavily } = require("@tavily/core");
 
-exports.handler = schedule("@hourly", async (event) => {
+exports.handler = schedule("*/30 * * * *", async (event) => {
   console.log("Starting Autonomous Agent Loop...");
 
   // 0. Validate Environment Variables

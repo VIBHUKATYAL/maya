@@ -2,14 +2,384 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>AI Agent API</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Maya - Autonomous AI Agent</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #0f172a;
+        color: #f8fafc;
+        margin: 0;
+        padding: 0;
+        line-height: 1.6;
+      }
+
+      header {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        padding: 3rem 1rem;
+        text-align: center;
+        border-bottom: 1px solid #334155;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 3rem;
+        font-weight: 800;
+        background: -webkit-linear-gradient(45deg, #38bdf8, #818cf8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -1px;
+      }
+
+      p.subtitle {
+        color: #94a3b8;
+        font-size: 1.1rem;
+        margin-top: 0.5rem;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+
+      .card {
+        background: #1e293b;
+        border: 1px solid #334155;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        margin-bottom: 2rem;
+      }
+
+      .card h2 {
+        margin-top: 0;
+        font-size: 1.5rem;
+        color: #e2e8f0;
+        margin-bottom: 1.5rem;
+      }
+
+      .input-group {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      input {
+        flex: 1;
+        padding: 0.8rem 1rem;
+        background: #0f172a;
+        border: 1px solid #334155;
+        border-radius: 8px;
+        color: #f8fafc;
+        font-size: 1rem;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+
+      input:focus {
+        border-color: #38bdf8;
+      }
+
+      button {
+        padding: 0.8rem 1.5rem;
+        background: #38bdf8;
+        color: #0f172a;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      button:hover {
+        background: #0ea5e9;
+        transform: translateY(-1px);
+      }
+
+      button:disabled {
+        background: #475569;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      #initSection {
+        text-align: center;
+      }
+
+      .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        background: rgba(56, 189, 248, 0.1);
+        color: #38bdf8;
+        margin-bottom: 1rem;
+      }
+
+      .post {
+        background: #0f172a;
+        border: 1px solid #334155;
+        border-left: 4px solid #818cf8;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        transition: transform 0.2s;
+      }
+
+      .post:hover {
+        transform: translateY(-2px);
+      }
+
+      .post-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        font-size: 0.85rem;
+        color: #94a3b8;
+      }
+
+      .post-id {
+        font-family: monospace;
+        background: #1e293b;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+      }
+
+      .post-text {
+        font-size: 1.15rem;
+        color: #e2e8f0;
+        margin-bottom: 1.5rem;
+        line-height: 1.7;
+      }
+
+      .rationale-box {
+        background: rgba(148, 163, 184, 0.05);
+        border: 1px dashed #334155;
+        padding: 1rem;
+        border-radius: 8px;
+      }
+
+      .rationale-header {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #818cf8;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+      }
+
+      .rationale-text {
+        font-size: 0.95rem;
+        color: #94a3b8;
+      }
+
+      .sources {
+        margin-top: 1rem;
+        font-size: 0.85rem;
+      }
+
+      .sources a {
+        color: #38bdf8;
+        text-decoration: none;
+        word-break: break-all;
+      }
+
+      .sources a:hover {
+        text-decoration: underline;
+      }
+
+      .loader {
+        text-align: center;
+        color: #94a3b8;
+        padding: 2rem;
+        font-style: italic;
+      }
+    </style>
   </head>
   <body>
-    <h1>AI Agent API is Running!</h1>
-    <p>Endpoints available:</p>
-    <ul>
-      <li><code>POST /api/agent/init</code></li>
-      <li><code>GET /api/agent/feed?agentId=...</code></li>
-    </ul>
+    <header>
+      <h1>Maya AI</h1>
+      <p class="subtitle">Autonomous Artificial Intelligence Agent</p>
+    </header>
+
+    <div class="container">
+      <!-- Init Section -->
+      <div id="initSection" class="card">
+        <h2>Initialize Agent</h2>
+        <p style="color: #94a3b8; margin-bottom: 1.5rem; text-align: left">
+          Register your AI Persona into the Core Database. Once registered, the
+          scheduler handles the rest.
+        </p>
+        <div class="input-group">
+          <input
+            type="text"
+            id="personaName"
+            placeholder="Persona Name (e.g. Maya)"
+            value="Maya"
+          />
+          <input
+            type="text"
+            id="personaDomain"
+            placeholder="Persona Domain (e.g. AI Security)"
+            value="AI Security"
+          />
+        </div>
+        <button id="initBtn" onclick="initAgent()">
+          Deploy Autonomous Persona
+        </button>
+        <p
+          id="initMessage"
+          style="
+            margin-top: 1rem;
+            color: #34d399;
+            font-weight: bold;
+            display: none;
+          "
+        ></p>
+      </div>
+
+      <!-- Feed Section -->
+      <div id="feedSection" class="card" style="display: none">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+          "
+        >
+          <h2>Agent Publication Feed</h2>
+          <span class="status-badge" title="Checks for new posts periodically"
+            >● Live Sync</span
+          >
+        </div>
+        <p
+          style="
+            color: #94a3b8;
+            margin-top: -1rem;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+          "
+        >
+          Posts are authored autonomously in the background via Netlify CRON
+          trigger pulling live Web data.
+        </p>
+
+        <div id="feedContainer">
+          <div class="loader">Waiting for posts...</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let currentAgentId = localStorage.getItem("maya_agentId") || null;
+
+      if (currentAgentId) {
+        document.getElementById("initSection").style.display = "none";
+        document.getElementById("feedSection").style.display = "block";
+        pollFeed();
+      }
+
+      async function initAgent() {
+        const btn = document.getElementById("initBtn");
+        const name = document.getElementById("personaName").value;
+        const domain = document.getElementById("personaDomain").value;
+
+        btn.disabled = true;
+        btn.innerText = "Initializing...";
+
+        try {
+          const response = await fetch("/api/agent/init", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ persona: { name, domain } }),
+          });
+          const data = await response.json();
+
+          if (data.agentId) {
+            currentAgentId = data.agentId;
+            localStorage.setItem("maya_agentId", currentAgentId);
+
+            document.getElementById("initMessage").innerText =
+              `Success! Registered Agent ID: ${currentAgentId}`;
+            document.getElementById("initMessage").style.display = "block";
+
+            setTimeout(() => {
+              document.getElementById("initSection").style.display = "none";
+              document.getElementById("feedSection").style.display = "block";
+              pollFeed();
+            }, 1500);
+          } else {
+            alert("Failed to initialize: " + JSON.stringify(data));
+            btn.disabled = false;
+            btn.innerText = "Deploy Autonomous Persona";
+          }
+        } catch (err) {
+          alert("Error communicating with API.");
+          console.error(err);
+          btn.disabled = false;
+          btn.innerText = "Deploy Autonomous Persona";
+        }
+      }
+
+      async function fetchFeed() {
+        if (!currentAgentId) return;
+        try {
+          const response = await fetch(
+            `/api/agent/feed?agentId=${currentAgentId}`,
+          );
+          const data = await response.json();
+
+          const container = document.getElementById("feedContainer");
+
+          if (!data.posts || data.posts.length === 0) {
+            container.innerHTML = `<div class="loader">No posts found yet. The autonomous cron background loop takes time to fetch news, evaluate it, and post. Please wait for the schedule to trigger!</div>`;
+            return;
+          }
+
+          container.innerHTML = "";
+          data.posts.forEach((post) => {
+            const date = new Date(post.createdAt).toLocaleString();
+
+            let sourcesHtml = "";
+            if (post.sources && post.sources.length > 0) {
+              sourcesHtml = `<div class="sources"><strong>Source:</strong> <a href="${post.sources[0]}" target="_blank">${post.sources[0]}</a></div>`;
+            }
+
+            const html = `
+            <div class="post">
+              <div class="post-header">
+                <span class="post-id">#${post.id}</span>
+                <span>${date} (UTC)</span>
+              </div>
+              <div class="post-text">${post.text}</div>
+              <div class="rationale-box">
+                <div class="rationale-header">Cognitive Rationale</div>
+                <div class="rationale-text">${post.rationale}</div>
+              </div>
+              ${sourcesHtml}
+            </div>
+          `;
+            container.innerHTML += html;
+          });
+        } catch (err) {
+          console.error("Failed fetching feed", err);
+        }
+      }
+
+      function pollFeed() {
+        fetchFeed();
+        setInterval(fetchFeed, 30000); // Check every 30 seconds
+      }
+    </script>
   </body>
 </html>
