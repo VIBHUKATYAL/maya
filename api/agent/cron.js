@@ -64,7 +64,8 @@ module.exports = async (req, res) => {
                   .map((p) => `Post Text: ${p.text}\nRationale: ${p.rationale}`)
                   .join("\n\n")
               : "No past posts.";
-          const prompt = `### ROLE ###\nYou are an autonomous AI content creator. Your persona:\n- Name: ${persona.name}\n- Domain: ${domain}\n\n### TASK ###\nReview live news articles and decide whether to publish a post. ONLY publish if highly relevant. REJECT generic topics.\n\n### MEMORY (DO NOT REPEAT THESE TOPICS) ###\n${memoryContext}\n\n### LIVE NEWS SOURCES ###\n${newsContext}\n\n### OUTPUT FORMAT ###\nYou MUST output valid raw JSON.\n{\n  "decision": "PUBLISH" | "REJECT",\n  "text": "The actual post content written in your persona's voice (if PUBLISH).",\n  "rationale": "Why you chose to publish or reject these topics.",\n  "sources": ["URL1"]\n}`;
+
+          const prompt = `### ROLE ###\nYou are an autonomous AI content creator. Your persona:\n- Name: ${persona.name}\n- Domain: ${domain}\n\n### TASK ###\nReview the live news articles and synthesize a fascinating short summary post. YOU MUST ALWAYS PUBLISH. Do NOT reject topics today.\n\n### MEMORY (DO NOT REPEAT THESE TOPICS) ###\n${memoryContext}\n\n### LIVE NEWS SOURCES ###\n${newsContext}\n\n### OUTPUT FORMAT ###\nYou MUST output valid raw JSON.\n{\n  "decision": "PUBLISH",\n  "text": "The actual post content written in your persona's voice.",\n  "rationale": "Why you chose to summarize this.",\n  "sources": ["URL1"]\n}`;
 
           const model = genAI.getGenerativeModel({
             model: "gemini-1.5-flash",
@@ -73,28 +74,24 @@ module.exports = async (req, res) => {
           const result = await model.generateContent(prompt);
           let llmOutput = JSON.parse(result.response.text().trim());
 
-          if (llmOutput.decision === "PUBLISH") {
-            const { error: insertError } = await supabase
-              .from("Posts")
-              .insert([
-                {
-                  agent_id: agent.id,
-                  text: llmOutput.text,
-                  rationale: llmOutput.rationale,
-                  sources: llmOutput.sources || [],
-                },
-              ]);
-            if (insertError)
-              await supabase
-                .from("Posts")
-                .insert([
-                  {
-                    agentId: agent.id,
-                    text: llmOutput.text,
-                    rationale: llmOutput.rationale,
-                    sources: llmOutput.sources || [],
-                  },
-                ]);
+          const { error: insertError } = await supabase.from("Posts").insert([
+            {
+              agent_id: agent.id,
+              text: llmOutput.text || "Default Post",
+              rationale: llmOutput.rationale || "Forced",
+              sources: llmOutput.sources || [],
+            },
+          ]);
+
+          if (insertError) {
+            await supabase.from("Posts").insert([
+              {
+                agentId: agent.id,
+                text: llmOutput.text || "Default",
+                rationale: llmOutput.rationale || "Forced",
+                sources: llmOutput.sources || [],
+              },
+            ]);
           }
         } catch (e) {
           console.error(`Error processing agent ${agent.id}:`, e);
