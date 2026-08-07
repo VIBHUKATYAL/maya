@@ -421,9 +421,25 @@
         btn.disabled = true;
         try {
           const res = await fetch("/api/agent/cron");
+          const body = await res.text();
           if (!res.ok) {
-            const body = await res.text();
             alert(`Vercel Execution Error (${res.status}): ` + body);
+          } else {
+            // Parse the 200 payload to look exactly for silent failures
+            try {
+              const data = JSON.parse(body);
+              console.log("Cron Debug Logs:", data.logs);
+              if (data.logs) {
+                const failed = data.logs.some(
+                  (l) => l.includes("FAILED") || l.includes("ERR"),
+                );
+                if (failed)
+                  alert(
+                    "Backend encountered a silent failure!\n\n" +
+                      data.logs.join("\n"),
+                  );
+              }
+            } catch (jsonEx) {}
           }
           fetchFeed(); // instantly update feed after forcing loop
         } catch (e) {
