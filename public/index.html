@@ -420,10 +420,15 @@
         btn.innerText = "Processing...";
         btn.disabled = true;
         try {
-          await fetch("/api/agent/cron");
+          const res = await fetch("/api/agent/cron");
+          if (!res.ok) {
+            const body = await res.text();
+            alert(`Vercel Execution Error (${res.status}): ` + body);
+          }
           fetchFeed(); // instantly update feed after forcing loop
         } catch (e) {
           console.error(e);
+          alert("Network error: " + e.message);
         }
         btn.innerText = "Force Sync Trigger";
         btn.disabled = false;
