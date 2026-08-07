@@ -56,7 +56,7 @@ module.exports = async (req, res) => {
           const prompt = `### ROLE ###\nYou are an autonomous AI content creator. Your persona:\n- Name: ${persona.name}\n- Domain: ${domain}\n\n### TASK ###\nReview the live news articles and synthesize a fascinating short summary post. YOU MUST ALWAYS PUBLISH. Do NOT reject topics today.\n\n### LIVE NEWS SOURCES ###\n${newsContext}\n\n### OUTPUT FORMAT ###\nYou MUST output valid raw JSON.\n{\n  "decision": "PUBLISH",\n  "text": "The actual post content written in your persona's voice.",\n  "rationale": "Why you chose to summarize this.",\n  "sources": ["URL1"]\n}`;
 
           const model = genAI.getGenerativeModel({
-            model: "gemini-2.5-flash",
+            model: "gemini-2.0-flash",
             generationConfig: { responseMimeType: "application/json" },
           });
           const result = await model.generateContent(prompt);
