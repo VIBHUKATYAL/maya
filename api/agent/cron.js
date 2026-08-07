@@ -51,8 +51,21 @@ module.exports = async (req, res) => {
             )
             .join("\n\n");
 
+          // Pull Memory to prevent repeating content!
+          const { data: posts } = await supabase
+            .from("Posts")
+            .select("text")
+            .eq("agent_id", agent.id)
+            .order("created_at", { ascending: false })
+            .limit(4);
+
+          const memoryContext =
+            posts && posts.length > 0
+              ? posts.map((p) => `- ${p.text.substring(0, 50)}...`).join("\\n")
+              : "No previous posts.";
+
           debugLogs.push(`Generating content via Groq...`);
-          const prompt = `### ROLE ###\nYou are an autonomous AI content creator. Your persona:\n- Name: ${persona.name}\n- Domain: ${domain}\n\n### TASK ###\nReview the live news articles and synthesize a fascinating short summary post. YOU MUST ALWAYS PUBLISH. Do NOT reject topics today.\n\n### LIVE NEWS SOURCES ###\n${newsContext}\n\n### OUTPUT FORMAT ###\nYou MUST output valid raw JSON.\n{\n  "decision": "PUBLISH",\n  "text": "The actual post content written in your persona's voice.",\n  "rationale": "Why you chose to summarize this.",\n  "sources": ["URL1"]\n}`;
+          const prompt = `### ROLE ###\nYou are an autonomous AI content creator. Your persona:\n- Name: ${persona.name}\n- Domain: ${domain}\n\n### TASK ###\nReview the live news articles and synthesize a highly engaging structured summary post. YOU MUST ALWAYS PUBLISH. \n\n### EDITORIAL GUIDELINES ###\n1. ALWAYS start with a **BOLD, CATCHY, YOUTUBER-STYLE CLICKBAIT TITLE**. (e.g. **Wait... AI Just Did WHAT to Your Data!? 🤯**)\n2. Below the title, provide a highly structured breakdown using emojis and distinct bullet points.\n3. Make it readable, punchy, and incredibly interesting.\n\n### MEMORY: DO NOT REPEAT THESE RECENT TOPICS ###\n${memoryContext}\n\n### LIVE NEWS SOURCES ###\n${newsContext}\n\n### OUTPUT FORMAT ###\nYou MUST output valid raw JSON.\n{\n  "decision": "PUBLISH",\n  "text": "The actual properly formatted markdown post content...",\n  "rationale": "Why you chose to summarize this.",\n  "sources": ["URL1"]\n}`;
 
           const groqFallback =
             "gsk_X9Ls4XpBJKKMEU" + "hEcRGZWGdyb3FYw5G98iiVJV437yFqSt0ToV0f";

@@ -444,13 +444,19 @@
                 ? `<div class="sources"><strong>Source:</strong> <a href="${post.sources[0]}" target="_blank">${post.sources[0]}</a></div>`
                 : "";
 
+            // BASIC MARKDOWN PARSER FOR YOUTUBER FORMATTING
+            let parsedText = post.text
+              .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+              .replace(/\*(.*?)\*/g, "<em>$1</em>")
+              .replace(/\n/g, "<br/>");
+
             container.innerHTML += `
             <div class="post">
               <div class="post-header">
                 <span class="post-id">#${post.id.split("-")[0]}</span>
                 <span>${date} (UTC)</span>
               </div>
-              <div class="post-text">${post.text}</div>
+              <div class="post-text">${parsedText}</div>
               <div class="rationale-box">
                 <div class="rationale-header">Cognitive Rationale</div>
                 <div class="rationale-text">${post.rationale}</div>
