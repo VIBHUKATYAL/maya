@@ -1,4 +1,6 @@
 const { createClient } = require("@supabase/supabase-js");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { tavily } = require("@tavily/core");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -7,13 +9,8 @@ const corsHeaders = {
 };
 
 exports.handler = async (event) => {
-  // Handle CORS preflight
   if (event.httpMethod === "OPTIONS") {
-    return {
-      statusCode: 204,
-      headers: corsHeaders,
-      body: "",
-    };
+    return { statusCode: 204, headers: corsHeaders, body: "" };
   }
 
   if (event.httpMethod !== "POST") {
@@ -28,48 +25,114 @@ exports.handler = async (event) => {
     const body = JSON.parse(event.body || "{}");
     const { persona } = body;
 
-    if (!persona) {
+    if (!persona || !persona.name || !persona.domain) {
       return {
         statusCode: 400,
         headers: corsHeaders,
         body: JSON.stringify({
-          error: 'Bad Request: "persona" object is required in request body.',
+          error:
+            'Bad Request: "persona" object with "name" and "domain" is required.',
         }),
       };
     }
 
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_KEY;
+    const { SUPABASE_URL, SUPABASE_KEY, GEMINI_API_KEY, TAVILY_API_KEY } =
+      process.env;
 
-    if (!supabaseUrl || !supabaseKey) {
-      console.warn("Supabase credentials missing from environment.");
-    }
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+    const tvly = tavily({ apiKey: TAVILY_API_KEY });
 
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    // Save strictly the persona object. Supabase will generate the ID typically.
-    const { data, error } = await supabase
+    // 1. Initialize Agent
+    const { data: agentData, error: agentError } = await supabase
       .from("Agents")
       .insert([{ persona }])
       .select("id")
       .single();
 
-    if (error) {
-      console.error("Supabase insert error:", error);
-      throw error;
-    }
+    if (agentError) throw agentError;
+    const agentId = agentData && (agentData.id || agentData.agentId);
 
-    // Assuming the table primary key is 'id' and we map it to 'agentId'.
-    // If the table uses 'agentId' directly, we fallback to it.
-    const returnedId =
-      (data && (data.id || data.agentId)) || "uuid-placeholder";
+    // 2. 🔥 INSTANTLY GENERATE FIRST POST (Seed the feed)
+    try {
+      const searchResponse = await tvly.search(
+        `Latest developments and breaking news regarding ${persona.domain}`,
+        {
+          searchDepth: "basic",
+          maxResults: 3,
+        },
+      );
+
+      const newsContext = searchResponse.results
+        .map((r) => `Title: ${r.title}\nContent: ${r.content}\nURL: ${r.url}`)
+        .join("\n\n");
+
+      const prompt = `
+### ROLE ###
+You are an autonomous AI content creator. Your persona:
+- Name: ${persona.name}
+- Domain/Focus: ${persona.domain}
+
+### TASK ###
+Review these live news articles and decide whether to publish a post. ONLY publish if highly relevant. REJECT generic topics.
+
+### LIVE NEWS SOURCES ###
+${newsContext}
+
+### OUTPUT FORMAT ###
+You MUST output valid, raw JSON exactly matching this structure. 
+{
+  "decision": "PUBLISH" | "REJECT",
+  "text": "The actual post content written in your persona's voice (if PUBLISH).",
+  "rationale": "Why you chose to publish or reject these topics.",
+  "sources": ["URL1", "URL2"]
+}
+`;
+
+      const model = genAI.getGenerativeModel({
+        model: "gemini-1.5-flash",
+        generationConfig: { responseMimeType: "application/json" },
+      });
+
+      const result = await model.generateContent(prompt);
+      const llmOutput = JSON.parse(result.response.text().trim());
+
+      if (llmOutput.decision === "PUBLISH") {
+        const postPayload = {
+          agent_id: agentId,
+          text: llmOutput.text,
+          rationale: llmOutput.rationale,
+          sources: llmOutput.sources || [],
+        };
+
+        const { error: insertError } = await supabase
+          .from("Posts")
+          .insert([postPayload]);
+        if (insertError) {
+          await supabase
+            .from("Posts")
+            .insert([
+              {
+                agentId,
+                text: llmOutput.text,
+                rationale: llmOutput.rationale,
+                sources: llmOutput.sources || [],
+              },
+            ]);
+        }
+      }
+    } catch (e) {
+      console.error(
+        "Failed to generate instant post (but agent initialized successfully):",
+        e,
+      );
+    }
+    // 🔥 End Instant Generation block
 
     return {
       statusCode: 200,
       headers: corsHeaders,
-      body: JSON.stringify({
-        agentId: returnedId,
-      }),
+      body: JSON.stringify({ agentId }),
     };
   } catch (error) {
     console.error("Internal Server Error:", error);
