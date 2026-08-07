@@ -304,6 +304,8 @@
           }
 
           grid.innerHTML = "";
+          let foundAny = false;
+
           data.agents.forEach((agent) => {
             const persona = agent.persona || {};
             const isPaused = persona.isActive === false;
@@ -328,6 +330,11 @@
             </div>
           `;
             grid.appendChild(div);
+
+            if (!currentAgentId && !foundAny && !isPaused) {
+              foundAny = true;
+              selectAgent(agent.id, persona.name);
+            }
           });
         } catch (e) {
           document.getElementById("agentGrid").innerHTML =
@@ -395,13 +402,16 @@
         btn.disabled = true;
         btn.innerText = "Deploying...";
         try {
-          await fetch("/api/agent/init", {
+          const createRes = await fetch("/api/agent/init", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ persona: { name, domain } }),
           });
+          const createdData = await createRes.json();
+
           document.getElementById("personaName").value = "";
           document.getElementById("personaDomain").value = "";
+          if (createdData.agentId) selectAgent(createdData.agentId, name);
           loadAgents();
         } catch (err) {
           alert("Error initiating deploy");
