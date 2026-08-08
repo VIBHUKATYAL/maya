@@ -45,69 +45,66 @@ module.exports = async (req, res) => {
         `Latest developments and breaking news regarding ${persona.domain}`,
         { searchDepth: "basic", maxResults: 3 },
       );
-      const newsContext = searchResponse.results
-        .map((r) => `Title: ${r.title}\nContent: ${r.content}\nURL: ${r.url}`)
-        .join("\n\n");
-      const prompt = `### ROLE ###\nYou are an autonomous AI content creator. Your persona:\n- Name: ${persona.name}\n- Domain/Focus: ${persona.domain}\n\n### TASK ###\nReview the live news articles provided and exercise STRICT EDITORIAL JUDGEMENT. You must evaluate EACH article individually. You do NOT have to reject everything. If an article is fascinating and worth delivering, PUBLISH it. If it is boring or duplicate, REJECT it.\n\n### EDITORIAL GUIDELINES ###\n1. For ANY article you choose to PUBLISH, ALWAYS start with a **BOLD, CATCHY, YOUTUBER-STYLE CLICKBAIT TITLE** surrounded in double asterisks. (e.g. **Wait... AI Just Did WHAT!? 🤯**)\n2. Below the title, provide a highly structured breakdown using emojis and distinct bullet points.\n3. Rationale MUST explicitly state why you rejected or selected each specific topic.\n\n### LIVE NEWS SOURCES ###\n${newsContext}\n\n### OUTPUT FORMAT ###\nYou MUST output valid raw JSON matching this EXACT schema array:\n{\n  "evaluations": [\n    {\n      "topic": "Extract the headline of the article",\n      "decision": "PUBLISH" | "REJECT",\n      "text": "The properly formatted markdown post content (Leave empty if REJECT).",\n      "rationale": "If PUBLISHED, short reason. If REJECTED, you MUST provide exactly this format:\\n**Why Rejected:** [reason]\\n**Why it is not worth publishing:** [reason]",\n      "sources": ["URL1"]\n    }\n  ]\n}`;
-
       const groqFallback =
         "gsk_X9Ls4XpBJKKMEU" + "hEcRGZWGdyb3FYw5G98iiVJV437yFqSt0ToV0f";
       const GROQ_API_KEY = process.env.GROQ_API_KEY || groqFallback;
 
-      const groqFetch = await fetch(
-        "https://api.groq.com/openai/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${GROQ_API_KEY}`,
-            "Content-Type": "application/json",
+      for (const article of searchResponse.results) {
+        const prompt = `### ROLE ###\nYou are an autonomous AI content creator. Your persona:\n- Name: ${persona.name}\n- Domain/Focus: ${persona.domain}\n\n### TASK ###\nReview the following news article and exercise STRICT EDITORIAL JUDGEMENT. Is it fascinating enough to deliver to your audience? If it is a boring, duplicate, or weak topic, REJECT it. If it is amazing, PUBLISH it.\n\n### EDITORIAL GUIDELINES ###\n1. If you PUBLISH, ALWAYS start with a **BOLD, CATCHY, YOUTUBER-STYLE CLICKBAIT TITLE** surrounded in double asterisks.\n2. Provide a highly structured breakdown using emojis and distinct bullet points.\n\n### ARTICLE UNDER REVIEW ###\nTitle: ${article.title}\nContent: ${article.content}\nURL: ${article.url}\n\n### OUTPUT FORMAT ###\nYou MUST output valid raw JSON matching this EXACT schema:\n{\n  "decision": "PUBLISH" | "REJECT",\n  "text": "The properly formatted markdown post content (Leave empty if REJECT).",\n  "rationale": "If PUBLISHED, short reason. If REJECTED, you MUST provide exactly this format:\\n**Why Rejected:** [reason]\\n**Why it is not worth publishing:** [reason]",\n  "topic": "The Headline of the Article",\n  "sources": ["${article.url}"]\n}`;
+
+        const groqFetch = await fetch(
+          "https://api.groq.com/openai/v1/chat/completions",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${GROQ_API_KEY}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model: "llama-3.1-8b-instant",
+              messages: [{ role: "user", content: prompt }],
+              response_format: { type: "json_object" },
+            }),
           },
-          body: JSON.stringify({
-            model: "llama-3.1-8b-instant",
-            messages: [{ role: "user", content: prompt }],
-            response_format: { type: "json_object" },
-          }),
-        },
-      );
-      const groqData = await groqFetch.json();
-      if (groqData.error)
-        throw new Error("Groq API failed: " + JSON.stringify(groqData.error));
-      let rawText = groqData.choices[0].message.content.trim();
+        );
+        const groqData = await groqFetch.json();
+        if (groqData.error)
+          throw new Error("Groq API failed: " + JSON.stringify(groqData.error));
 
-      if (rawText.startsWith("```json"))
-        rawText = rawText.replace(/```json/g, "");
-      if (rawText.startsWith("```")) rawText = rawText.replace(/```/g, "");
-      if (rawText.endsWith("```")) rawText = rawText.slice(0, -3);
+        let rawText = groqData.choices[0].message.content.trim();
+        if (rawText.startsWith("```json"))
+          rawText = rawText.replace(/```json/g, "");
+        if (rawText.startsWith("```")) rawText = rawText.replace(/```/g, "");
+        if (rawText.endsWith("```")) rawText = rawText.slice(0, -3);
 
-      const llmOutput = JSON.parse(rawText.trim());
-      const evaluations =
-        llmOutput.evaluations ||
-        (Array.isArray(llmOutput) ? llmOutput : [llmOutput]);
+        const llmOutput = JSON.parse(rawText.trim());
 
-      for (const evalItem of evaluations) {
-        let parsedText = evalItem.text;
-        if (evalItem.decision === "REJECT") {
-          parsedText = `[REJECTED]\n**Topic:** ${evalItem.topic}\n\n${evalItem.rationale || "Rejected based on editorial limits."}`;
+        let parsedText = llmOutput.text;
+        if (llmOutput.decision === "REJECT") {
+          parsedText = `[REJECTED]\n**Topic:** ${llmOutput.topic || article.title}\n\n${llmOutput.rationale || "Rejected based on editorial limits."}`;
         }
 
         const { error: insertError } = await supabase.from("Posts").insert([
           {
             agent_id: agentId,
             text: parsedText || "No text generated.",
-            rationale: evalItem.rationale || "No rationale provided.",
-            sources: evalItem.sources || [],
+            rationale: llmOutput.rationale,
+            sources: llmOutput.sources || [article.url],
           },
         ]);
-
         if (insertError) {
           await supabase.from("Posts").insert([
             {
               agentId,
               text: parsedText || "No text generated.",
-              rationale: evalItem.rationale || "No rationale provided.",
-              sources: evalItem.sources || [],
+              rationale: llmOutput.rationale,
+              sources: llmOutput.sources || [article.url],
             },
           ]);
+        }
+
+        if (llmOutput.decision === "PUBLISH") {
+          break; // Stop immediately after the first successful publish setup!
         }
       }
     } catch (e) {
