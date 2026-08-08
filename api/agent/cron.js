@@ -54,10 +54,10 @@ module.exports = async (req, res) => {
             `Adversarial attacks, safety frameworks, and security research in ${domain}`,
             `Behind the scenes engineering challenges and executive strategy in ${domain}`,
           ];
-          // Shuffle and pick 2 randomly
+          // Shuffle and pick 4 randomly for wider fallback pool
           const searchQueries = allQueries
             .sort(() => 0.5 - Math.random())
-            .slice(0, 2);
+            .slice(0, 4);
 
           let postPublished = false;
           let groqEvals = 0;
@@ -124,9 +124,13 @@ module.exports = async (req, res) => {
                     if (postKeywords.has(word)) overlap++;
                   }
                   const similarity =
-                    overlap / Math.max(1, articleKeywords.size);
-                  // If 40% of the significant words in the title match an existing post, it's a recycled story!
-                  if (similarity > 0.4) {
+                    overlap /
+                    Math.max(
+                      1,
+                      Math.min(articleKeywords.size, postKeywords.size),
+                    );
+                  // Stricter string-based similarity filter: if 35% of the title overlaps entirely with any past post text, KILL it.
+                  if (similarity > 0.35) {
                     isExactDuplicate = true;
                     break;
                   }
@@ -140,7 +144,7 @@ module.exports = async (req, res) => {
                 continue; // HARD SKIP! Never hits the LLM prompt.
               }
 
-              if (groqEvals >= 2) {
+              if (groqEvals >= 3) {
                 debugLogs.push(
                   `Throttling execution early to prevent Vercel Timeout limit.`,
                 );
