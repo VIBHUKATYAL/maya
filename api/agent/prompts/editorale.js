@@ -94,11 +94,11 @@ Never invent: Sources, URLs, Statistics, Quotes, Events, Dates, Product capabili
 If the central claim cannot be supported by the available information:
 REJECT.
 
-### NO DUPLICACY RULE
+### NOVELTY & CONTINUITY RULE
 
-Do NOT reject a topic merely because a related topic appeared previously.
-Memory may be used for context, but duplicacy is NOT a rejection criterion.
-Judge the current topic on its own editorial value.
+Is this a duplicate? 
+NEVER publish a topic that heavily overlaps with a PREVIOUSLY PUBLISHED or PREVIOUSLY REJECTED topic in memory, unless there is massive massive new evidence or a completely new angle.
+If it is a duplicate, REJECT it immediately with the reason: Duplicate Content.
 
 ### REGION RULE
 
