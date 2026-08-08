@@ -36,10 +36,20 @@ module.exports = async (req, res) => {
           debugLogs.push(`Starting agent ${agent.id}`);
           const domain = persona.domain || "Technology";
 
-          const searchQueries = [
+          const allQueries = [
             `Latest breaking news and developments in ${domain}`,
             `Untold stories, deep dives, and highly engaging evergreen topics regarding ${domain}`,
+            `Recent controversies and ethical debates in ${domain}`,
+            `Future predictions, breakthroughs, and trends in ${domain}`,
+            `Unexpected applications and startup innovations in ${domain}`,
+            `Regulatory changes, policy, and government impact on ${domain}`,
+            `Behind the scenes interviews and executive leadership in ${domain}`,
+            `Major investments, funding rounds, and acquisitions in ${domain}`,
           ];
+          // Shuffle and pick 2 randomly
+          const searchQueries = allQueries
+            .sort(() => 0.5 - Math.random())
+            .slice(0, 2);
 
           let postPublished = false;
 

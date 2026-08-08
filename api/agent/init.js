@@ -42,10 +42,20 @@ module.exports = async (req, res) => {
 
     // 2. 🔥 INSTANTLY GENERATE FIRST POST (Seed the feed)
     try {
-      const searchQueries = [
+      const allQueries = [
         `Latest breaking news and developments in ${persona.domain}`,
         `Untold stories, deep dives, and highly engaging evergreen topics regarding ${persona.domain}`,
+        `Recent controversies and ethical debates in ${persona.domain}`,
+        `Future predictions, breakthroughs, and trends in ${persona.domain}`,
+        `Unexpected applications and startup innovations in ${persona.domain}`,
+        `Regulatory changes, policy, and government impact on ${persona.domain}`,
+        `Behind the scenes interviews and executive leadership in ${persona.domain}`,
+        `Major investments, funding rounds, and acquisitions in ${persona.domain}`,
       ];
+      // Shuffle and pick 2 randomly
+      const searchQueries = allQueries
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 2);
 
       const groqFallback =
         "gsk_X9Ls4XpBJKKMEU" + "hEcRGZWGdyb3FYw5G98iiVJV437yFqSt0ToV0f";
