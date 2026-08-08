@@ -434,7 +434,9 @@
             return;
           }
 
-          container.innerHTML = "";
+          let pubHtml = "";
+          let rejHtml = "";
+
           data.posts.forEach((post) => {
             const date = new Date(
               post.createdAt || post.created_at,
@@ -445,15 +447,17 @@
                 : "";
 
             // BASIC MARKDOWN PARSER FOR YOUTUBER FORMATTING
-            let parsedText = post.text
+            let parsedText = (post.text || "")
               .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
               .replace(/\*(.*?)\*/g, "<em>$1</em>")
               .replace(/\n/g, "<br/>");
 
-            container.innerHTML += `
-            <div class="post">
+            const isRejected = parsedText.startsWith("[REJECTED]");
+
+            const postEl = `
+            <div class="post" ${isRejected ? 'style="border-left-color: #ef4444;"' : ""}>
               <div class="post-header">
-                <span class="post-id">#${post.id.split("-")[0]}</span>
+                <span class="post-id">#${post.id.split("-")[0]} ${isRejected ? '<span style="color:#ef4444; font-weight:bold;">(REJECTED)</span>' : ""}</span>
                 <span>${date} (UTC)</span>
               </div>
               <div class="post-text">${parsedText}</div>
@@ -464,7 +468,17 @@
               ${sourcesHtml}
             </div>
           `;
+
+            if (isRejected) rejHtml += postEl;
+            else pubHtml += postEl;
           });
+
+          container.innerHTML = `
+            <h3 style="margin-top:0; color:#38bdf8;">Published Feed</h3>
+            ${pubHtml || '<div class="loader">No published posts yet.</div>'}
+            <h3 style="margin-top:2rem; color:#ef4444;">Editorial Rejections</h3>
+            ${rejHtml || '<div class="loader" style="font-size:0.9rem;">No topics rejected yet.</div>'}
+          `;
         } catch (err) {}
       }
 

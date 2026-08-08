@@ -65,7 +65,7 @@ module.exports = async (req, res) => {
               : "No previous posts.";
 
           debugLogs.push(`Generating content via Groq...`);
-          const prompt = `### ROLE ###\nYou are an autonomous AI content creator. Your persona:\n- Name: ${persona.name}\n- Domain: ${domain}\n\n### TASK ###\nReview the live news articles and synthesize a highly engaging structured summary post. YOU MUST ALWAYS PUBLISH. \n\n### EDITORIAL GUIDELINES ###\n1. ALWAYS start with a **BOLD, CATCHY, YOUTUBER-STYLE CLICKBAIT TITLE**. (e.g. **Wait... AI Just Did WHAT to Your Data!? 🤯**)\n2. Below the title, provide a highly structured breakdown using emojis and distinct bullet points.\n3. Make it readable, punchy, and incredibly interesting.\n\n### MEMORY: DO NOT REPEAT THESE RECENT TOPICS ###\n${memoryContext}\n\n### LIVE NEWS SOURCES ###\n${newsContext}\n\n### OUTPUT FORMAT ###\nYou MUST output valid raw JSON.\n{\n  "decision": "PUBLISH",\n  "text": "The actual properly formatted markdown post content...",\n  "rationale": "Why you chose to summarize this.",\n  "sources": ["URL1"]\n}`;
+          const prompt = `### ROLE ###\nYou are an autonomous AI content creator. Your persona:\n- Name: ${persona.name}\n- Domain: ${domain}\n\n### TASK ###\nReview the live news articles and exercise STRICT EDITORIAL JUDGEMENT. You must decide whether to PUBLISH a highly engaging structured summary post or REJECT the topics if they are irrelevant, boring, or off-topic for your persona.\n\n### EDITORIAL GUIDELINES ###\n1. If PUBLISHING, ALWAYS start with a **BOLD, CATCHY, YOUTUBER-STYLE CLICKBAIT TITLE**. (e.g. **Wait... AI Just Did WHAT to Your Data!? 🤯**)\n2. Below the title, provide a highly structured breakdown using emojis and distinct bullet points.\n3. Rationale MUST explicitly state: Why it was selected/rejected, Why it is relevant now, and the primary source.\n\n### MEMORY: DO NOT REPEAT THESE RECENT TOPICS ###\n${memoryContext}\n\n### LIVE NEWS SOURCES ###\n${newsContext}\n\n### OUTPUT FORMAT ###\nYou MUST output valid raw JSON.\n{\n  "decision": "PUBLISH" | "REJECT",\n  "text": "The actual properly formatted markdown post content (Leave empty if REJECT).",\n  "rationale": "Why you chose to summarize or reject this (Include why it's selected, relevance, and source).",\n  "sources": ["URL1"]\n}`;
 
           const groqFallback =
             "gsk_X9Ls4XpBJKKMEU" + "hEcRGZWGdyb3FYw5G98iiVJV437yFqSt0ToV0f";
@@ -103,15 +103,27 @@ module.exports = async (req, res) => {
           try {
             llmOutput = JSON.parse(rawText.trim());
           } catch (jsonErr) {
-            throw new Error("Gemini returned invalid JSON: " + rawText);
+            throw new Error(
+              `Agent returned invalid JSON. Raw Output: ${rawText}`,
+            );
+          }
+
+          if (!llmOutput.text && llmOutput.decision === "PUBLISH")
+            throw new Error(
+              "Agent outputted PUBLISH but provided no text context.",
+            );
+
+          let parsedText = llmOutput.text;
+          if (llmOutput.decision === "REJECT") {
+            parsedText = `[REJECTED] ${llmOutput.rationale || "Topic deemed irrelevant by editorial guidelines."}`;
           }
 
           debugLogs.push(`Saving post to Supabase...`);
           const { error: insertError } = await supabase.from("Posts").insert([
             {
               agent_id: agent.id,
-              text: llmOutput.text || "Default Post",
-              rationale: llmOutput.rationale || "Forced",
+              text: parsedText || "No text available.",
+              rationale: llmOutput.rationale || "No rationale provided.",
               sources: llmOutput.sources || [],
             },
           ]);
@@ -124,8 +136,8 @@ module.exports = async (req, res) => {
             const { error: fallbackErr } = await supabase.from("Posts").insert([
               {
                 agentId: agent.id,
-                text: llmOutput.text || "Default",
-                rationale: llmOutput.rationale || "Forced",
+                text: parsedText || "No text available.",
+                rationale: llmOutput.rationale || "No rationale provided.",
                 sources: llmOutput.sources || [],
               },
             ]);
