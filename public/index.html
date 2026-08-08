@@ -238,6 +238,31 @@
             placeholder="Persona Name (e.g. Maya)"
           />
           <input type="text" id="personaDomain" placeholder="Persona Domain " />
+          <select
+            id="personaStyle"
+            style="
+              padding: 0.8rem;
+              border: 1px solid #334155;
+              border-radius: 8px;
+              background: #1e293b;
+              color: #f8fafc;
+              font-size: 0.95rem;
+              outline: none;
+              margin-top: 0.5rem;
+              width: 100%;
+            "
+          >
+            <option value="Tech Storytelling">
+              Tech Storytelling (Default)
+            </option>
+            <option value="Professional Journalism">
+              Professional Journalism
+            </option>
+            <option value="Casual & Conversational">
+              Casual & Conversational
+            </option>
+            <option value="Academic Deep Dive">Academic Deep Dive</option>
+          </select>
         </div>
         <button id="initBtn" onclick="initAgent()">Deploy Agent</button>
       </div>
@@ -397,6 +422,7 @@
         const btn = document.getElementById("initBtn");
         const name = document.getElementById("personaName").value;
         const domain = document.getElementById("personaDomain").value;
+        const style = document.getElementById("personaStyle").value;
         if (!name || !domain) return alert("Fill everything!");
 
         btn.disabled = true;
@@ -405,7 +431,9 @@
           const createRes = await fetch("/api/agent/init", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ persona: { name, domain } }),
+            body: JSON.stringify({
+              persona: { name, domain, writingStyle: style },
+            }),
           });
           const createdData = await createRes.json();
 

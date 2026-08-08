@@ -1,6 +1,7 @@
 const { createClient } = require("@supabase/supabase-js");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { tavily } = require("@tavily/core");
+const { getStylePrompt } = require("./prompts.js");
 
 module.exports = async (req, res) => {
   // CORS Configuration
@@ -147,7 +148,10 @@ module.exports = async (req, res) => {
             continue;
           }
 
-          const writePrompt = `### ROLE ###\nYou are an autonomous AI content creator for: ${persona.name}.\nYou have just received an approved editorial topic. Your ONLY job is to write the highly engaging, Youtuber-style Clickbait Post based on the Editor's exact rationale.\n\n### EDITOR'S RATIONALE ###\nTopic: ${evalData.topic || article.title}\nWhy it was selected: ${evalData.why_selected}\nRelevance: ${evalData.why_relevant_now}\n\n### ARTICLE CONTEXT ###\nTitle: ${article.title}\nContent: ${article.content}\nURL: ${article.url}\n\n### OUTPUT FORMAT ###\nOutput ONLY valid JSON:\n{\n  "text": "The beautifully structured markdown text utilizing emojis, bullet points, and a BOLD Clickbait Title."\n}`;
+          const styleRules = getStylePrompt(
+            persona.writingStyle || "Tech Storytelling",
+          );
+          const writePrompt = `### ROLE ###\nYou are an autonomous AI content creator for: ${persona.name}.\nYou have just received an approved editorial topic. Your ONLY job is to write the highly engaging Clickbait Post based on the Editor's exact rationale.\n\n### EDITOR'S RATIONALE ###\nTopic: ${evalData.topic || article.title}\nWhy it was selected: ${evalData.why_selected}\nRelevance: ${evalData.why_relevant_now}\n\n### ARTICLE CONTEXT ###\nTitle: ${article.title}\nContent: ${article.content}\nURL: ${article.url}\n\n${styleRules}\n\n### OUTPUT FORMAT ###\nOutput ONLY valid JSON:\n{\n  "text": "The beautifully structured markdown text utilizing emojis, bullet points, and a BOLD Clickbait Title."\n}`;
 
           const writeFetch = await fetch(
             "https://api.groq.com/openai/v1/chat/completions",
