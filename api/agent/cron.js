@@ -1,6 +1,9 @@
 const { createClient } = require("@supabase/supabase-js");
 const { tavily } = require("@tavily/core");
-const { getStylePrompt } = require("../../lib/prompts.js");
+const {
+  getStylePrompt,
+  fetchWithGroqFallback,
+} = require("../../lib/prompts.js");
 const { getEditorialPrompt } = require("../../lib/prompts/editorale.js");
 
 module.exports = async (req, res) => {
@@ -179,27 +182,10 @@ module.exports = async (req, res) => {
                 memoryContext,
               });
 
-              const evalFetch = await fetch(
-                "https://api.groq.com/openai/v1/chat/completions",
-                {
-                  method: "POST",
-                  headers: {
-                    Authorization: `Bearer ${getGroqKey()}`,
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    model: "llama-3.1-8b-instant",
-                    messages: [{ role: "user", content: evalPrompt }],
-                    response_format: { type: "json_object" },
-                  }),
-                },
+              const evalResp = await fetchWithGroqFallback(
+                evalPrompt,
+                groqKeys,
               );
-              const evalResp = await evalFetch.json();
-              if (evalResp.error) {
-                throw new Error(
-                  "Groq Eval API failed: " + JSON.stringify(evalResp.error),
-                );
-              }
 
               // Strip backticks if any
               let rawEval = evalResp.choices[0].message.content.trim();
@@ -286,27 +272,10 @@ module.exports = async (req, res) => {
               // THROTTLE TO PREVENT GROQ 429 RATE LIMITS (Max 30 requests/min free tier)
               await new Promise((resolve) => setTimeout(resolve, 900));
 
-              const writeFetch = await fetch(
-                "https://api.groq.com/openai/v1/chat/completions",
-                {
-                  method: "POST",
-                  headers: {
-                    Authorization: `Bearer ${getGroqKey()}`,
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    model: "llama-3.1-8b-instant",
-                    messages: [{ role: "user", content: writePrompt }],
-                    response_format: { type: "json_object" },
-                  }),
-                },
+              const writeResp = await fetchWithGroqFallback(
+                writePrompt,
+                groqKeys,
               );
-              const writeResp = await writeFetch.json();
-              if (writeResp.error) {
-                throw new Error(
-                  "Groq Write API failed: " + JSON.stringify(writeResp.error),
-                );
-              }
 
               let rawWrite = writeResp.choices[0].message.content.trim();
               if (rawWrite.startsWith("```json"))

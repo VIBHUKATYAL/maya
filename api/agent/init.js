@@ -1,6 +1,9 @@
 const { createClient } = require("@supabase/supabase-js");
 const { tavily } = require("@tavily/core");
-const { getStylePrompt } = require("../../lib/prompts.js");
+const {
+  getStylePrompt,
+  fetchWithGroqFallback,
+} = require("../../lib/prompts.js");
 
 module.exports = async (req, res) => {
   // CORS Configuration
@@ -101,23 +104,7 @@ module.exports = async (req, res) => {
           // THROTTLE TO PREVENT GROQ 429 RATE LIMITS (Max 30 requests/min free tier)
           await new Promise((resolve) => setTimeout(resolve, 900));
 
-          const evalFetch = await fetch(
-            "https://api.groq.com/openai/v1/chat/completions",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${getGroqKey()}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                model: "llama-3.1-8b-instant",
-                messages: [{ role: "user", content: evalPrompt }],
-                response_format: { type: "json_object" },
-              }),
-            },
-          );
-          const evalResp = await evalFetch.json();
-          if (evalResp.error) throw new Error("Groq Eval API failed");
+          const evalResp = await fetchWithGroqFallback(evalPrompt, groqKeys);
 
           let rawEval = evalResp.choices[0].message.content.trim();
           if (rawEval.startsWith("```json"))
@@ -196,23 +183,7 @@ module.exports = async (req, res) => {
           // THROTTLE BEFORE GENERATION CALL TO PROTECT RATE LIMIT
           await new Promise((resolve) => setTimeout(resolve, 900));
 
-          const writeFetch = await fetch(
-            "https://api.groq.com/openai/v1/chat/completions",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${getGroqKey()}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                model: "llama-3.1-8b-instant",
-                messages: [{ role: "user", content: writePrompt }],
-                response_format: { type: "json_object" },
-              }),
-            },
-          );
-          const writeResp = await writeFetch.json();
-          if (writeResp.error) throw new Error("Groq Write API failed");
+          const writeResp = await fetchWithGroqFallback(writePrompt, groqKeys);
 
           let rawWrite = writeResp.choices[0].message.content.trim();
           if (rawWrite.startsWith("```json"))
