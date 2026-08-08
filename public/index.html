@@ -154,6 +154,13 @@
       z-index: 10;
     }
 
+    .telemetry-card-glow:hover {
+      transform: translateY(-6px) scale(1.03) !important;
+      border-color: rgba(56, 189, 248, 0.7) !important;
+      box-shadow: 0 0 35px rgba(56, 189, 248, 0.35), 0 0 15px rgba(168, 85, 247, 0.2) !important;
+      z-index: 10;
+    }
+
     .btn-pause-hover:hover {
       box-shadow: 0 0 20px rgba(245, 158, 11, 0.65) !important;
       border-color: rgba(245, 158, 11, 0.9) !important;
@@ -469,17 +476,17 @@
           style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px;">
 
           <!-- API Usage Card -->
-          <div class="panel relative overflow-hidden p-5 transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-[0_12px_30px_rgba(56,189,248,0.15)]"
+          <div class="panel telemetry-card-glow relative overflow-hidden p-5 transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-[0_12px_30px_rgba(56,189,248,0.15)]"
             style="position: relative; overflow: hidden; padding: 22px; border-top: 2px solid #38bdf8; background: linear-gradient(160deg, rgba(22, 30, 49, 0.8) 0%, rgba(14, 19, 32, 0.9) 100%);">
             <div class="grid-lines pointer-events-none absolute inset-0 opacity-30" style="position: absolute; inset: 0; pointer-events: none; opacity: 0.3;"></div>
             
             <div class="relative flex items-center justify-between gap-3" style="position: relative; display: flex; justify-content: space-between; align-items: center; gap: 14px;">
               <div class="flex-1">
                 <p class="text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground flex items-center gap-1.5" style="font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #94a3b8;">
-                  Tavily SDK (Approx)
+                  Tavily Tokens (Approx)
                 </p>
                 <p class="mt-2 font-mono text-[1.4rem] font-extrabold leading-none text-foreground truncate" style="font-size: 1.4rem; font-weight: 800; line-height: 1; margin-top: 10px;">
-                  <span id="metricTavilyVal">0</span><span class="ml-1 text-[0.65rem] font-semibold text-primary" style="margin-left: 4px; font-size: 0.75rem; font-weight: 600; color: #38bdf8;">/ 2000 req</span>
+                  <span id="metricTavilyVal">0</span><span class="ml-1 text-[0.65rem] font-semibold text-primary" style="margin-left: 4px; font-size: 0.75rem; font-weight: 600; color: #38bdf8;">/ 2000</span>
                 </p>
               </div>
 
@@ -512,7 +519,7 @@
 
           <!-- Active Agents Card -->
           <div
-            class="panel relative overflow-hidden p-5 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500/50 hover:shadow-[0_12px_30px_rgba(16,185,129,0.15)]"
+            class="panel telemetry-card-glow relative overflow-hidden p-5 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500/50 hover:shadow-[0_12px_30px_rgba(16,185,129,0.15)]"
             style="position: relative; overflow: hidden; padding: 22px; border-top: 2px solid #10b981; background: linear-gradient(160deg, rgba(22, 30, 49, 0.8) 0%, rgba(14, 19, 32, 0.9) 100%);">
             <div class="grid-lines pointer-events-none absolute inset-0 opacity-30"
               style="position: absolute; inset: 0; pointer-events: none; opacity: 0.3;"></div>
@@ -551,7 +558,7 @@
 
           <!-- Memory Usage Card -->
           <div onclick="openMemoryModal()"
-            class="panel relative overflow-hidden p-5 transition-all duration-300 hover:-translate-y-1 hover:border-violet/50 hover:shadow-[0_12px_30px_rgba(167,139,250,0.15)] cursor-pointer"
+            class="panel telemetry-card-glow relative overflow-hidden p-5 transition-all duration-300 hover:-translate-y-1 hover:border-violet/50 hover:shadow-[0_12px_30px_rgba(167,139,250,0.15)] cursor-pointer"
             style="position: relative; overflow: hidden; padding: 22px; cursor: pointer; border-top: 2px solid #a78bfa; background: linear-gradient(160deg, rgba(22, 30, 49, 0.8) 0%, rgba(14, 19, 32, 0.9) 100%);"
             title="Click to view detailed Supabase database memory breakdown">
             <div class="grid-lines pointer-events-none absolute inset-0 opacity-30"
@@ -595,13 +602,12 @@
               </div>
             </div>
             <p class="relative mt-3.5 text-xs text-muted-foreground" id="metricMemorySub"
-              style="position: relative; margin-top: 14px; font-size: 0.75rem; color: #94a3b8;">0.00% of 500 MB database
-              store • Click to view breakdown</p>
+              style="position: relative; margin-top: 14px; font-size: 0.75rem; color: #94a3b8;">0.00% of 500 MB Supabase database store</p>
           </div>
 
           <!-- Sources Cited Card -->
           <div onclick="openSourcesModal()"
-            class="panel relative overflow-hidden p-5 transition-all duration-300 hover:-translate-y-1 hover:border-amber-500/50 hover:shadow-[0_12px_30px_rgba(245,158,11,0.15)] cursor-pointer"
+            class="panel telemetry-card-glow relative overflow-hidden p-5 transition-all duration-300 hover:-translate-y-1 hover:border-amber-500/50 hover:shadow-[0_12px_30px_rgba(245,158,11,0.15)] cursor-pointer"
             style="position: relative; overflow: hidden; padding: 22px; cursor: pointer; border-top: 2px solid #f59e0b; background: linear-gradient(160deg, rgba(22, 30, 49, 0.8) 0%, rgba(14, 19, 32, 0.9) 100%);"
             title="Click to view all cited research sources">
             <div class="grid-lines pointer-events-none absolute inset-0 opacity-30"
@@ -1251,7 +1257,7 @@
           document.getElementById('metricMemoryKB').textContent = mb;
           const memBar = document.getElementById('memoryProgressBar');
           if (memBar) memBar.style.width = `${Math.max(1, memPct)}%`;
-          document.getElementById('metricMemorySub').textContent = `${memPct.toFixed(2)}% of 500 MB database store • Click to view`;
+          document.getElementById('metricMemorySub').textContent = `${memPct.toFixed(2)}% of 500 MB Supabase database store`;
 
           const allSources = globalPosts.flatMap(p => p.sources || []).filter(s => s);
           const uniqueDomainsSet = new Set(allSources.map(s => {
