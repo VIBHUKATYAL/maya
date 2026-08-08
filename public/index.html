@@ -473,18 +473,41 @@
             style="position: relative; overflow: hidden; padding: 22px; border-top: 2px solid #38bdf8; background: linear-gradient(160deg, rgba(22, 30, 49, 0.8) 0%, rgba(14, 19, 32, 0.9) 100%);">
             <div class="grid-lines pointer-events-none absolute inset-0 opacity-30" style="position: absolute; inset: 0; pointer-events: none; opacity: 0.3;"></div>
             
-            <div class="relative flex flex-col gap-3" style="position: relative; display: flex; flex-direction: column; gap: 14px;">
-              <!-- API: Tavily Search -->
-              <div class="flex items-center justify-between" style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="relative flex items-center justify-between gap-3" style="position: relative; display: flex; justify-content: space-between; align-items: center; gap: 14px;">
+              <div class="flex-1">
                 <p class="text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground flex items-center gap-1.5" style="font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #94a3b8;">
-                  Tavily Search API
+                  Tavily SDK (Approx)
                 </p>
-                <p class="font-mono text-[1.1rem] font-extrabold leading-none text-foreground truncate" style="font-size: 1.1rem; font-weight: 800; line-height: 1;">
-                  <span id="metricTavilyVal">0</span><span class="ml-1 text-[0.65rem] font-semibold text-primary" style="margin-left: 4px; font-size: 0.65rem; font-weight: 600; color: #38bdf8;">/ 2000 total req</span>
+                <p class="mt-2 font-mono text-[1.4rem] font-extrabold leading-none text-foreground truncate" style="font-size: 1.4rem; font-weight: 800; line-height: 1; margin-top: 10px;">
+                  <span id="metricTavilyVal">0</span><span class="ml-1 text-[0.65rem] font-semibold text-primary" style="margin-left: 4px; font-size: 0.75rem; font-weight: 600; color: #38bdf8;">/ 2000 req</span>
                 </p>
               </div>
+
+              <!-- SVG Donut Chart Ring -->
+              <div class="relative flex items-center justify-center shrink-0"
+                style="position: relative; display: flex; align-items: center; justify-content: center; width: 56px; height: 56px; flex-shrink: 0;">
+                <svg width="56" height="56" viewBox="0 0 56 56"
+                  style="transform: rotate(-90deg); width: 56px; height: 56px;">
+                  <defs>
+                    <linearGradient id="donutGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#38bdf8" />
+                      <stop offset="100%" stop-color="#a855f7" />
+                    </linearGradient>
+                  </defs>
+                  <!-- Background Circle Track -->
+                  <circle cx="28" cy="28" r="22" stroke="rgba(56, 189, 248, 0.15)" stroke-width="4.5" fill="none" />
+                  <!-- Animated Progress Circle Stroke -->
+                  <circle id="donutCircleRing" cx="28" cy="28" r="22" stroke="url(#donutGradient)" stroke-width="4.5"
+                    fill="none" stroke-linecap="round" stroke-dasharray="138.23" stroke-dashoffset="138.23"
+                    style="transition: stroke-dashoffset 0.6s cubic-bezier(0.16, 1, 0.3, 1);" />
+                </svg>
+                <!-- Center Percentage Text -->
+                <span id="donutCenterPct" class="absolute font-mono text-[0.65rem] font-extrabold text-white"
+                  style="position: absolute; font-size: 0.65rem; font-weight: 800; color: #fff;">0%</span>
+              </div>
             </div>
-            <p class="relative mt-3 text-[0.68rem] text-muted-foreground" id="metricTokensSub" style="position: relative; margin-top: 14px; font-size: 0.68rem; color: #94a3b8; text-align: center;">Lifetime consumption across all keys</p>
+            
+            <p class="relative mt-3 text-[0.68rem] text-muted-foreground" id="metricTokensSub" style="position: relative; margin-top: 14px; font-size: 0.68rem; color: #94a3b8; text-align: left;">Lifetime consumption across all keys</p>
           </div>
 
           <!-- Active Agents Card -->
@@ -1668,8 +1691,20 @@
 
       function renderTokenMetric() {
         const tavVal = document.getElementById('metricTavilyVal');
+        const donutRing = document.getElementById('donutCircleRing');
+        const donutCenterPct = document.getElementById('donutCenterPct');
+
         if (tavVal) {
           tavVal.textContent = cachedPostsCount.toLocaleString('en-IN');
+        }
+
+        if (donutRing && donutCenterPct) {
+          const pct = (cachedPostsCount / 2000) * 100;
+          const clampedPct = Math.min(100, Math.max(0, pct));
+          const circumference = 138.23; // 2 * PI * 22
+          const offset = circumference * (1 - clampedPct / 100);
+          donutRing.style.strokeDashoffset = offset;
+          donutCenterPct.textContent = `${clampedPct.toFixed(0)}%`;
         }
       }
 
