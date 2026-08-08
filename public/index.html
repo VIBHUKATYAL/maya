@@ -348,6 +348,7 @@
             div.innerHTML = `
             <div class="agent-title">${persona.name || "Unknown"}</div>
             <div class="agent-domain">${persona.domain || "N/A"}</div>
+            <div class="agent-domain" style="font-size: 0.75rem; margin-top: 0.25rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">📝  ${persona.writingStyle || "Tech Storytelling"}</div>
             <div style="position: absolute; top: 1rem; right: 1rem; display: flex; gap: 0.5rem; z-index: 10;">
                 <button class="throttle-btn ${isPaused ? "paused" : ""}" style="position: static;" onclick="toggleAgent('${agent.id}', ${isPaused})">
                   ${isPaused ? "Resume" : "Pause"}
