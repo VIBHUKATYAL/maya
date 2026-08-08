@@ -65,7 +65,7 @@ module.exports = async (req, res) => {
               : "No previous posts.";
 
           debugLogs.push(`Generating content via Groq...`);
-          const prompt = `### ROLE ###\nYou are an autonomous AI content creator. Your persona:\n- Name: ${persona.name}\n- Domain: ${domain}\n\n### TASK ###\nReview the live news articles and exercise STRICT EDITORIAL JUDGEMENT. You must decide whether to PUBLISH a highly engaging structured summary post or REJECT the topics if they are irrelevant, boring, or off-topic for your persona.\n\n### EDITORIAL GUIDELINES ###\n1. If PUBLISHING, ALWAYS start with a **BOLD, CATCHY, YOUTUBER-STYLE CLICKBAIT TITLE**. (e.g. **Wait... AI Just Did WHAT to Your Data!? 🤯**)\n2. Below the title, provide a highly structured breakdown using emojis and distinct bullet points.\n3. Rationale MUST explicitly state: Why it was selected/rejected, Why it is relevant now, and the primary source.\n\n### MEMORY: DO NOT REPEAT THESE RECENT TOPICS ###\n${memoryContext}\n\n### LIVE NEWS SOURCES ###\n${newsContext}\n\n### OUTPUT FORMAT ###\nYou MUST output valid raw JSON.\n{\n  "decision": "PUBLISH" | "REJECT",\n  "text": "The actual properly formatted markdown post content (Leave empty if REJECT).",\n  "rationale": "Why you chose to summarize or reject this (Include why it's selected, relevance, and source).",\n  "sources": ["URL1"]\n}`;
+          const prompt = `### ROLE ###\nYou are an autonomous AI content creator. Your persona:\n- Name: ${persona.name}\n- Domain: ${domain}\n\n### TASK ###\nReview the live news articles provided and exercise STRICT EDITORIAL JUDGEMENT. You must evaluate EACH article individually. Reject the boring/duplicate ones, and only PUBLISH the single most fascinating topic.\n\n### EDITORIAL GUIDELINES ###\n1. For the ONE article you choose to PUBLISH, ALWAYS start with a **BOLD, CATCHY, YOUTUBER-STYLE CLICKBAIT TITLE**. (e.g. **Wait... AI Just Did WHAT to Your Data!? 🤯**)\n2. Below the title, provide a highly structured breakdown using emojis and distinct bullet points.\n3. Rationale MUST explicitly state why you rejected or selected each specific topic.\n\n### MEMORY: DO NOT REPEAT THESE RECENT TOPICS ###\n${memoryContext}\n\n### LIVE NEWS SOURCES ###\n${newsContext}\n\n### OUTPUT FORMAT ###\nYou MUST output valid raw JSON matching this EXACT schema array:\n{\n  "evaluations": [\n    {\n      "decision": "PUBLISH" | "REJECT",\n      "text": "The properly formatted markdown post content (Leave empty if REJECT).",\n      "rationale": "Why you rejected or selected this specific article.",\n      "sources": ["URL1"]\n    }\n  ]\n}`;
 
           const groqFallback =
             "gsk_X9Ls4XpBJKKMEU" + "hEcRGZWGdyb3FYw5G98iiVJV437yFqSt0ToV0f";
@@ -108,45 +108,42 @@ module.exports = async (req, res) => {
             );
           }
 
-          if (!llmOutput.text && llmOutput.decision === "PUBLISH")
-            throw new Error(
-              "Agent outputted PUBLISH but provided no text context.",
-            );
+          const evaluations =
+            llmOutput.evaluations ||
+            (Array.isArray(llmOutput) ? llmOutput : [llmOutput]);
+          debugLogs.push(
+            `Saving ${evaluations.length} evaluations to Supabase...`,
+          );
 
-          let parsedText = llmOutput.text;
-          if (llmOutput.decision === "REJECT") {
-            parsedText = `[REJECTED] ${llmOutput.rationale || "Topic deemed irrelevant by editorial guidelines."}`;
-          }
+          for (const evalItem of evaluations) {
+            let parsedText = evalItem.text;
+            if (evalItem.decision === "REJECT") {
+              parsedText = `[REJECTED] ${evalItem.rationale || "Topic deemed irrelevant by editorial guidelines."}`;
+            }
 
-          debugLogs.push(`Saving post to Supabase...`);
-          const { error: insertError } = await supabase.from("Posts").insert([
-            {
-              agent_id: agent.id,
-              text: parsedText || "No text available.",
-              rationale: llmOutput.rationale || "No rationale provided.",
-              sources: llmOutput.sources || [],
-            },
-          ]);
-
-          if (insertError) {
-            debugLogs.push(
-              `First insert failed, attempting fallback column naming (agentId)... ERR: ` +
-                JSON.stringify(insertError),
-            );
-            const { error: fallbackErr } = await supabase.from("Posts").insert([
+            const { error: insertError } = await supabase.from("Posts").insert([
               {
-                agentId: agent.id,
+                agent_id: agent.id,
                 text: parsedText || "No text available.",
-                rationale: llmOutput.rationale || "No rationale provided.",
-                sources: llmOutput.sources || [],
+                rationale: evalItem.rationale || "No rationale provided.",
+                sources: evalItem.sources || [],
               },
             ]);
-            if (fallbackErr)
-              throw new Error(
-                "Fallback insert also failed: " + JSON.stringify(fallbackErr),
-              );
+
+            if (insertError) {
+              await supabase.from("Posts").insert([
+                {
+                  agentId: agent.id,
+                  text: parsedText || "No text available.",
+                  rationale: evalItem.rationale || "No rationale provided.",
+                  sources: evalItem.sources || [],
+                },
+              ]);
+            }
           }
-          debugLogs.push(`Successfully saved post for agent ${agent.id}!`);
+          debugLogs.push(
+            `Successfully saved evaluations for agent ${agent.id}!`,
+          );
         } catch (e) {
           const errString = e.message || JSON.stringify(e);
           console.error(`Error processing agent ${agent.id}:`, errString);
