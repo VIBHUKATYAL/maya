@@ -803,10 +803,13 @@ CONSISTENCY > IMPROVISATION.
 The user should be able to select the same style today and tomorrow and immediately recognize that both posts belong to the SAME writing persona.
 The topic can completely change.
 The writing style must not.
-\`;
+`;
 
 function getStylePrompt(styleName = "Tech Storytelling") {
-  return MASTER_PROMPT + \`\n\n==================================================\n### YOUR CURRENT SELECTED STYLE: \${styleName} ###\n==================================================\n\nCRITICAL INSTRUCTION: You MUST use the \${styleName} style exactly as defined above for this specific post. Do NOT mix styles. Output strictly according to the structure and format constraints of \${styleName}.\`;
+  return (
+    MASTER_PROMPT +
+    `\n\n==================================================\n### YOUR CURRENT SELECTED STYLE: ${styleName} ###\n==================================================\n\nCRITICAL INSTRUCTION: You MUST use the ${styleName} style exactly as defined above for this specific post. Do NOT mix styles. Output strictly according to the structure and format constraints of ${styleName}.`
+  );
 }
 
 module.exports = { getStylePrompt };
