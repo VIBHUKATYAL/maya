@@ -66,9 +66,9 @@ module.exports = async (req, res) => {
             debugLogs.push(
               `Evaluating article sequentially via Groq: ${article.title}`,
             );
-            const prompt = `### ROLE ###\nYou are an autonomous AI content creator. Your persona:\n- Name: ${persona.name}\n- Domain: ${domain}\n\n### TASK ###\nReview the following news article and exercise STRICT EDITORIAL JUDGEMENT. Is it fascinating enough to deliver to your audience? If it is a boring, duplicate, or weak topic, REJECT it. If it is amazing, PUBLISH it.\n\n### EDITORIAL GUIDELINES ###\n1. If you PUBLISH, ALWAYS start with a **BOLD, CATCHY, YOUTUBER-STYLE CLICKBAIT TITLE**.\n2. Provide a highly structured breakdown using emojis and bullet points.\n\n### MEMORY: DO NOT REPEAT THESE TOPICS ###\n${memoryContext}\n\n### ARTICLE UNDER REVIEW ###\nTitle: ${article.title}\nContent: ${article.content}\nURL: ${article.url}\n\n### OUTPUT FORMAT ###\nYou MUST output valid raw JSON matching this EXACT schema:\n{\n  "decision": "PUBLISH" | "REJECT",\n  "text": "The properly formatted markdown post content (Leave empty if REJECT).",\n  "rationale": "If PUBLISHED, short reason. If REJECTED, you MUST provide exactly this format:\\n**Why Rejected:** [reason]\\n**Why it is not worth publishing:** [reason]",\n  "topic": "The Headline of the Article",\n  "sources": ["${article.url}"]\n}`;
+            const evalPrompt = `### ROLE ###\nYou are a senior AI editorial architect formatting data for ${persona.name}.\nYour job is STRICT EDITORIAL EVALUATION. \nDetermine if the following article is worth publishing for the sector: ${domain}\n\n### EDITORIAL STANDARDS ###\n- Relevance: Does this matter right now?\n- Evidence Quality: Are there credible sources?\n- Novelty: Is this a duplicate?\n\n### ARTICLE TO EVALUATE ###\nTitle: ${article.title}\nContent: ${article.content}\nURL: ${article.url}\n\n### RECENT PUBLISHED MEMORY ###\n${memoryContext}\n\n### OUTPUT FORMAT ###\nYou MUST output valid JSON exactly matching this schema:\n{\n  "decision": "PUBLISH" | "REJECT",\n  "score": 0-100,\n  "confidence": 0.0-1.0,\n  "reasoning": {\n    "relevance": "string",\n    "evidence_quality": "string",\n    "novelty": "string"\n  },\n  "why_selected": "string (null if rejected)",\n  "why_relevant_now": "string (null if rejected)",\n  "sources": [{"title": "article title", "url": "article url"}],\n  "rejection_reason": "string (null if published)",\n  "topic": "Extracted Headline"\n}`;
 
-            const groqFetch = await fetch(
+            const evalFetch = await fetch(
               "https://api.groq.com/openai/v1/chat/completions",
               {
                 method: "POST",
@@ -78,44 +78,127 @@ module.exports = async (req, res) => {
                 },
                 body: JSON.stringify({
                   model: "llama-3.1-8b-instant",
-                  messages: [{ role: "user", content: prompt }],
+                  messages: [{ role: "user", content: evalPrompt }],
                   response_format: { type: "json_object" },
                 }),
               },
             );
-            const groqData = await groqFetch.json();
-            if (groqData.error)
-              throw new Error(
-                "Groq API failed: " + JSON.stringify(groqData.error),
-              );
+            const evalResp = await evalFetch.json();
+            if (evalResp.error) throw new Error("Groq Eval API failed");
 
-            let rawText = groqData.choices[0].message.content.trim();
-            if (rawText.startsWith("```json"))
-              rawText = rawText.replace(/```json/g, "");
-            if (rawText.startsWith("```"))
-              rawText = rawText.replace(/```/g, "");
-            if (rawText.endsWith("```")) rawText = rawText.slice(0, -3);
+            // Strip backticks if any
+            let rawEval = evalResp.choices[0].message.content.trim();
+            if (rawEval.startsWith("```json"))
+              rawEval = rawEval.replace(/```json/g, "");
+            if (rawEval.startsWith("```"))
+              rawEval = rawEval.replace(/```/g, "");
+            if (rawEval.endsWith("```")) rawEval = rawEval.slice(0, -3);
 
-            let llmOutput;
+            let evalData;
             try {
-              llmOutput = JSON.parse(rawText.trim());
-            } catch (jsonErr) {
-              throw new Error(
-                `Agent returned invalid JSON. Raw Output: ${rawText}`,
-              );
+              evalData = JSON.parse(rawEval.trim());
+            } catch (err) {
+              evalData = {
+                decision: "REJECT",
+                rejection_reason: "Malformed LLM evaluation response.",
+              };
             }
 
-            let parsedText = llmOutput.text;
-            if (llmOutput.decision === "REJECT") {
-              parsedText = `[REJECTED]\n**Topic:** ${llmOutput.topic || article.title}\n\n${llmOutput.rationale || "Rejected based on editorial limits."}`;
+            // SERVER-SIDE DETERMINISTIC VALIDATION
+            let finalDecision = evalData.decision || "REJECT";
+            let validationRejection = "";
+
+            if (finalDecision === "PUBLISH") {
+              if (
+                !evalData.sources ||
+                !evalData.sources.some((s) => s.url === article.url)
+              ) {
+                finalDecision = "REJECT";
+                validationRejection =
+                  "Fabricated URL/Source mismatch detected.";
+              } else if (!evalData.why_relevant_now) {
+                finalDecision = "REJECT";
+                validationRejection = "Missing publishing rationale criteria.";
+              } else if (evalData.score && evalData.score < 70) {
+                finalDecision = "REJECT";
+                validationRejection =
+                  "Topic scored too low logically to securely publish.";
+              }
             }
+
+            if (finalDecision !== "PUBLISH") {
+              const combinedReason =
+                validationRejection ||
+                evalData.rejection_reason ||
+                "Rejected by strict editorial logic.";
+              const parsedText = `[REJECTED]\n**Topic:** ${evalData.topic || article.title}\n\n**Decision Score:** ${evalData.score || 0}/100\n**Evaluation:** ${combinedReason}`;
+
+              const { error: insertError } = await supabase
+                .from("Posts")
+                .insert([
+                  {
+                    agent_id: agent.id,
+                    text: parsedText,
+                    rationale: `Rejected evaluation.`,
+                    sources: [article.url],
+                  },
+                ]);
+              if (insertError) {
+                await supabase.from("Posts").insert([
+                  {
+                    agentId: agent.id,
+                    text: parsedText,
+                    rationale: `Rejected evaluation.`,
+                    sources: [article.url],
+                  },
+                ]);
+              }
+              continue; // Next article!
+            }
+
+            // GENERATION PHASE!
+            const writePrompt = `### ROLE ###\nYou are an autonomous AI content creator for: ${persona.name}.\nYou have just received an approved editorial topic. Your ONLY job is to write the highly engaging, Youtuber-style Clickbait Post based on the Editor's exact rationale.\n\n### EDITOR'S RATIONALE ###\nTopic: ${evalData.topic || article.title}\nWhy it was selected: ${evalData.why_selected}\nRelevance: ${evalData.why_relevant_now}\n\n### ARTICLE CONTEXT ###\nTitle: ${article.title}\nContent: ${article.content}\nURL: ${article.url}\n\n### OUTPUT FORMAT ###\nOutput ONLY valid JSON:\n{\n  "text": "The beautifully structured markdown text utilizing emojis, bullet points, and a BOLD Clickbait Title."\n}`;
+
+            const writeFetch = await fetch(
+              "https://api.groq.com/openai/v1/chat/completions",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${GROQ_API_KEY}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  model: "llama-3.1-8b-instant",
+                  messages: [{ role: "user", content: writePrompt }],
+                  response_format: { type: "json_object" },
+                }),
+              },
+            );
+            const writeResp = await writeFetch.json();
+            if (writeResp.error) throw new Error("Groq Write API failed");
+
+            let rawWrite = writeResp.choices[0].message.content.trim();
+            if (rawWrite.startsWith("```json"))
+              rawWrite = rawWrite.replace(/```json/g, "");
+            if (rawWrite.startsWith("```"))
+              rawWrite = rawWrite.replace(/```/g, "");
+            if (rawWrite.endsWith("```")) rawWrite = rawWrite.slice(0, -3);
+
+            let generatedText = article.title; // fallback
+            try {
+              generatedText = JSON.parse(rawWrite.trim()).text;
+            } catch (e) {
+              generatedText = rawWrite;
+            }
+
+            const rationaleOutput = `**Score:** ${evalData.score || 0}/100 | **Confidence:** ${evalData.confidence || 0}\n**Why Selected:** ${evalData.why_selected}\n**Relevance:** ${evalData.why_relevant_now}`;
 
             const { error: insertError } = await supabase.from("Posts").insert([
               {
                 agent_id: agent.id,
-                text: parsedText || "No text available.",
-                rationale: llmOutput.rationale || "No rationale provided.",
-                sources: llmOutput.sources || [article.url],
+                text: generatedText || "No text available.",
+                rationale: rationaleOutput,
+                sources: [article.url],
               },
             ]);
 
@@ -123,19 +206,17 @@ module.exports = async (req, res) => {
               await supabase.from("Posts").insert([
                 {
                   agentId: agent.id,
-                  text: parsedText || "No text available.",
-                  rationale: llmOutput.rationale || "No rationale provided.",
-                  sources: llmOutput.sources || [article.url],
+                  text: generatedText || "No text available.",
+                  rationale: rationaleOutput,
+                  sources: [article.url],
                 },
               ]);
             }
 
-            if (llmOutput.decision === "PUBLISH") {
-              debugLogs.push(
-                `Agent ${agent.id} published successfully. Moving to next agent...`,
-              );
-              break; // Break the article search loop instantly once a post is made!
-            }
+            debugLogs.push(
+              `Agent ${agent.id} published successfully. Moving to next agent...`,
+            );
+            break; // Break the article search loop instantly once a post is made!
           }
           debugLogs.push(`Successfully evaluated loop for agent ${agent.id}!`);
         } catch (e) {
