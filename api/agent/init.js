@@ -58,7 +58,7 @@ module.exports = async (req, res) => {
         const searchResponse = await tvly.search(query, {
           searchDepth: "basic",
           topic: "news",
-          maxResults: 3,
+          maxResults: 10,
         });
 
         if (!searchResponse || !searchResponse.results) continue;
