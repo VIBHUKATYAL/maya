@@ -20,12 +20,25 @@ module.exports = async (req, res) => {
       .from("Posts")
       .select("*", { count: "exact", head: true });
 
+    // Fetch real database size via Supabase RPC (requires get_db_size SQL function)
+    let databaseSizeBytes = null;
+    try {
+      const { data: sizeData, error: rpcErr } =
+        await supabase.rpc("get_db_size");
+      if (!rpcErr && sizeData !== null) {
+        databaseSizeBytes = sizeData;
+      }
+    } catch (_) {
+      // RPC not available yet — frontend will fall back to estimation
+    }
+
     if (error) throw error;
     if (countError) throw countError;
 
     return res.status(200).json({
       agents: data,
       globalPostsCount: globalPostsCount || 0,
+      databaseSizeBytes,
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });

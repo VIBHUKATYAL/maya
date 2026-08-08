@@ -573,7 +573,7 @@
                 <p class="mt-2.5 font-mono text-3xl font-extrabold leading-none text-foreground"
                   style="margin-top: 10px; font-size: 2rem; font-weight: 800; line-height: 1;">
                   <span id="metricMemoryKB">0.0</span><span class="ml-1.5 text-sm font-semibold text-violet"
-                    style="margin-left: 6px; font-size: 0.875rem; font-weight: 600; color: #c084fc;">KB</span>
+                    style="margin-left: 6px; font-size: 0.875rem; font-weight: 600; color: #c084fc;">MB</span>
                 </p>
               </div>
               <span
@@ -1232,22 +1232,26 @@
           const bar = document.getElementById('activeProgressBar');
           if (bar) bar.style.width = `${Math.max(2, pct)}%`;
 
-          // Real Database Context Memory Calculation (Supabase direct byte size extrapolation)
+          // Real Database Memory from Supabase (via pg_database_size RPC)
           const globalPosts = await fetchGlobalPosts(activeAgentsList);
           
-          const agentBytes = JSON.stringify(activeAgentsList).length;
-          // Accurately estimate Supabase payload: global lifetime posts * average payload byte size to prevent dropping on disconnected agents
-          const postBytes = cachedPostsCount * 1350; 
+          let totalBytes;
+          if (data.databaseSizeBytes !== null && data.databaseSizeBytes !== undefined) {
+            totalBytes = data.databaseSizeBytes;
+          } else {
+            // Fallback estimation if RPC not yet created
+            const agentBytes = JSON.stringify(activeAgentsList).length;
+            const postBytes = cachedPostsCount * 1350;
+            totalBytes = agentBytes + postBytes;
+          }
 
-          const totalBytes = agentBytes + postBytes;
-          const kb = (totalBytes / 1024).toFixed(1);
-          // Scale to Supabase's 500MB Free Tier
+          const mb = (totalBytes / (1024 * 1024)).toFixed(2);
           const memPct = (totalBytes / (500 * 1024 * 1024)) * 100;
 
-          document.getElementById('metricMemoryKB').textContent = kb;
+          document.getElementById('metricMemoryKB').textContent = mb;
           const memBar = document.getElementById('memoryProgressBar');
           if (memBar) memBar.style.width = `${Math.max(1, memPct)}%`;
-          document.getElementById('metricMemorySub').textContent = `${memPct.toFixed(4)}% of 500 MB database store • Click to view`;
+          document.getElementById('metricMemorySub').textContent = `${memPct.toFixed(2)}% of 500 MB database store • Click to view`;
 
           const allSources = globalPosts.flatMap(p => p.sources || []).filter(s => s);
           const uniqueDomainsSet = new Set(allSources.map(s => {
