@@ -22,14 +22,17 @@ module.exports = async (req, res) => {
 
     // Fetch real database size via Supabase RPC (requires get_db_size SQL function)
     let databaseSizeBytes = null;
+    let rpcDebug = null;
     try {
       const { data: sizeData, error: rpcErr } =
         await supabase.rpc("get_db_size");
       if (!rpcErr && sizeData !== null) {
         databaseSizeBytes = sizeData;
+      } else if (rpcErr) {
+        rpcDebug = rpcErr.message || JSON.stringify(rpcErr);
       }
-    } catch (_) {
-      // RPC not available yet — frontend will fall back to estimation
+    } catch (e) {
+      rpcDebug = e.message || "RPC threw exception";
     }
 
     if (error) throw error;
@@ -39,6 +42,7 @@ module.exports = async (req, res) => {
       agents: data,
       globalPostsCount: globalPostsCount || 0,
       databaseSizeBytes,
+      rpcDebug,
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
