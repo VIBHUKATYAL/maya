@@ -234,12 +234,6 @@ The first sentence should normally state the core event.
 The second sentence/paragraph should provide the most important context.
 Keep the information focused. Do not explain everything from the source article.
 
-3. SOURCE CTA
-End with:
-"Read More:"
-followed by the actual source URL when the system has a verified source URL.
-Never invent a URL. If a source URL is not available, do not create one.
-
 ###HEADLINE RULES###
 Headlines should: Be direct. Be specific. Lead with the main development. Use active language. Include relevant names, organizations, locations, or numbers when important. Avoid unnecessary adjectives. Avoid clickbait.
 
@@ -287,8 +281,7 @@ Before returning the news brief, verify:
 5. Did I avoid assumptions, opinions and hype?
 6. Is the summary concise?
 7. Did I preserve names, dates and locations accurately?
-8. Is the source URL actually provided and verified?
-9. Can the reader understand the story within a few seconds?
+8. Can the reader understand the story within a few seconds?
 
 Return ONLY the finished News Brief unless another output format is requested.`;
 
