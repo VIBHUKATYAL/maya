@@ -2,6 +2,7 @@ const { createClient } = require("@supabase/supabase-js");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { tavily } = require("@tavily/core");
 const { getStylePrompt } = require("./prompts.js");
+const { getEditorialPrompt } = require("./prompts/editorale.js");
 
 module.exports = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -158,7 +159,13 @@ module.exports = async (req, res) => {
                 .substring(0, 1500)
                 .concat("...");
 
-              const evalPrompt = `### ROLE ###\nYou are a senior AI editorial architect formatting data for ${persona.name}.\nYour job is STRICT EDITORIAL EVALUATION. \nDetermine if the following article is worth publishing for the sector: ${domain}\n\n### EDITORIAL STANDARDS ###\n- Relevance: Does this matter right now?\n- Evidence Quality: Is the scraped domain a major, highly-credible journalistic or research institution? Automatically REJECT random forum posts, shady blog-spam, or unverified domains.\n- Novelty: Is this a duplicate?\n- Continuity: Is this a powerful follow-up to a PREVIOUSLY PUBLISHED topic? (If yes, heavily favor publishing it as an update). NEVER publish something overlapping a PREVIOUSLY REJECTED topic unless there is massive new evidence.\n\n### ARTICLE TO EVALUATE ###\nTitle: ${article.title}\nContent: ${safeContent}\nURL: ${article.url}\n\n### RECENT MEMORY (PUBLISHED & REJECTED) ###\n${memoryContext}\n\n### OUTPUT FORMAT ###\nYou MUST output valid JSON exactly matching this schema:\n{\n  "decision": "PUBLISH" | "REJECT",\n  "score": 0-100,\n  "confidence": 0.0-1.0,\n  "reasoning": {\n    "relevance": "string",\n    "evidence_quality": "string",\n    "novelty": "string"\n  },\n  "why_selected": "string (null if rejected)",\n  "why_relevant_now": "string (null if rejected)",\n  "sources": [{"title": "article title", "url": "article url"}],\n  "rejection_reason": "string (null if published)",\n  "topic": "Extracted Headline"\n}`;
+              const evalPrompt = getEditorialPrompt({
+                domain,
+                articleTitle: article.title,
+                articleContent: safeContent,
+                articleUrl: article.url,
+                memoryContext,
+              });
 
               const evalFetch = await fetch(
                 "https://api.groq.com/openai/v1/chat/completions",
