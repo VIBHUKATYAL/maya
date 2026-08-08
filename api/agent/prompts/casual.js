@@ -1,4 +1,4 @@
-module.exports = \`==================================================
+module.exports = `==================================================
 ### STYLE 6 — CASUAL OPINION ###
 ==================================================
 
@@ -159,4 +159,4 @@ Before returning, silently verify:
 
 If any constraint fails, revise before returning.
 
-Return ONLY the finished post.\`;
+Return ONLY the finished post.`;
