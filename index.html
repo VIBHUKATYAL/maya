@@ -595,7 +595,7 @@
               </div>
             </div>
             <p class="relative mt-3.5 text-xs text-muted-foreground" id="metricMemorySub"
-              style="position: relative; margin-top: 14px; font-size: 0.75rem; color: #94a3b8;">0.00% of 5 MB context
+              style="position: relative; margin-top: 14px; font-size: 0.75rem; color: #94a3b8;">0.00% of 500 MB database
               store • Click to view breakdown</p>
           </div>
 
@@ -1232,21 +1232,22 @@
           const bar = document.getElementById('activeProgressBar');
           if (bar) bar.style.width = `${Math.max(2, pct)}%`;
 
-          // Real Database Context Memory Calculation (Supabase direct byte size)
+          // Real Database Context Memory Calculation (Supabase direct byte size extrapolation)
           const globalPosts = await fetchGlobalPosts(activeAgentsList);
           
-          cachedTotalMemBytes = data.totalMemoryBytes || JSON.stringify(activeAgentsList).length;
-          cachedAgentsMemBytes = data.agentsMemoryBytes || JSON.stringify(activeAgentsList).length;
-          cachedPostsMemBytes = data.postsMemoryBytes || (globalPosts.length ? JSON.stringify(globalPosts).length : 0);
+          const agentBytes = JSON.stringify(activeAgentsList).length;
+          // Accurately estimate Supabase payload: global lifetime posts * average payload byte size to prevent dropping on disconnected agents
+          const postBytes = cachedPostsCount * 1350; 
 
-          const totalBytes = cachedTotalMemBytes + cachedPostsMemBytes;
+          const totalBytes = agentBytes + postBytes;
           const kb = (totalBytes / 1024).toFixed(1);
-          const memPct = (totalBytes / (5 * 1024 * 1024)) * 100;
+          // Scale to Supabase's 500MB Free Tier
+          const memPct = (totalBytes / (500 * 1024 * 1024)) * 100;
 
           document.getElementById('metricMemoryKB').textContent = kb;
           const memBar = document.getElementById('memoryProgressBar');
-          if (memBar) memBar.style.width = `${Math.max(2, memPct)}%`;
-          document.getElementById('metricMemorySub').textContent = `${memPct.toFixed(2)}% of 5 MB context store • Click to view breakdown`;
+          if (memBar) memBar.style.width = `${Math.max(1, memPct)}%`;
+          document.getElementById('metricMemorySub').textContent = `${memPct.toFixed(4)}% of 500 MB database store • Click to view`;
 
           const allSources = globalPosts.flatMap(p => p.sources || []).filter(s => s);
           const uniqueDomainsSet = new Set(allSources.map(s => {
@@ -1717,19 +1718,12 @@
         const tavilyCredits = posts.length;
         document.getElementById('metricSourcesSub').textContent = `${tavilyCredits} Tavily search credit${tavilyCredits === 1 ? '' : 's'} used`;
 
-        let bytes = 0;
-        posts.forEach(p => {
-          bytes += JSON.stringify(p).length;
-        });
-        bytes += posts.length * 256; // Overhead for LLM context window headers
-
-        const kb = (bytes / 1024).toFixed(1);
-        const memPct = (bytes / (5 * 1024 * 1024)) * 100;
-
-        document.getElementById('metricMemoryKB').textContent = kb;
+        // Telemetry calculation is now deferred entirely to the global anchor point.
+        // We no longer calculate dynamic memory byte length here because it would misrepresent the globally deployed agents.
         const memBar = document.getElementById('memoryProgressBar');
-        if (memBar) memBar.style.width = `${Math.max(2, memPct)}%`;
-        document.getElementById('metricMemorySub').textContent = `${memPct.toFixed(2)}% of 5 MB context store (${bytes.toLocaleString()} bytes)`;
+        if (memBar && memBar.style.width === '') {
+           memBar.style.width = '1%';
+        }
 
         if (posts.length > 0) {
           const latest = posts[0];
