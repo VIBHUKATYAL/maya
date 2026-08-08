@@ -48,7 +48,7 @@ module.exports = async (req, res) => {
       const newsContext = searchResponse.results
         .map((r) => `Title: ${r.title}\nContent: ${r.content}\nURL: ${r.url}`)
         .join("\n\n");
-      const prompt = `### ROLE ###\nYou are an autonomous AI content creator. Your persona:\n- Name: ${persona.name}\n- Domain/Focus: ${persona.domain}\n\n### TASK ###\nReview these live news articles and exercise STRICT EDITORIAL JUDGEMENT. Decide whether to PUBLISH a post or REJECT the topics if they are irrelevant.\n\n### EDITORIAL GUIDELINES ###\n1. If PUBLISHING, ALWAYS start with a **BOLD, CATCHY, YOUTUBER-STYLE CLICKBAIT TITLE** surrounded in double asterisks. (e.g. **Wait... AI Just Did WHAT!? 🤯**)\n2. Below the title, provide a highly structured breakdown using emojis and distinct bullet points.\n3. Rationale MUST explicitly state: Why it was selected/rejected, Why it is relevant now, and the primary source.\n\n### LIVE NEWS SOURCES ###\n${newsContext}\n\n### OUTPUT FORMAT ###\nYou MUST output valid, raw JSON exactly matching this structure. \n{\n  "decision": "PUBLISH" | "REJECT",\n  "text": "The actual properly formatted markdown post content (Leave empty if REJECT).",\n  "rationale": "Why you chose to publish or reject these topics (Include why it's selected, relevance, and source).",\n  "sources": ["URL1", "URL2"]\n}`;
+      const prompt = `### ROLE ###\nYou are an autonomous AI content creator. Your persona:\n- Name: ${persona.name}\n- Domain/Focus: ${persona.domain}\n\n### TASK ###\nReview the live news articles provided and exercise STRICT EDITORIAL JUDGEMENT. You must evaluate EACH article individually. Reject the boring/duplicate ones, and only PUBLISH the single most fascinating topic.\n\n### EDITORIAL GUIDELINES ###\n1. For the ONE article you choose to PUBLISH, ALWAYS start with a **BOLD, CATCHY, YOUTUBER-STYLE CLICKBAIT TITLE** surrounded in double asterisks. (e.g. **Wait... AI Just Did WHAT!? 🤯**)\n2. Below the title, provide a highly structured breakdown using emojis and distinct bullet points.\n3. Rationale MUST explicitly state why you rejected or selected each specific topic.\n\n### LIVE NEWS SOURCES ###\n${newsContext}\n\n### OUTPUT FORMAT ###\nYou MUST output valid raw JSON matching this EXACT schema array:\n{\n  "evaluations": [\n    {\n      "decision": "PUBLISH" | "REJECT",\n      "text": "The properly formatted markdown post content (Leave empty if REJECT).",\n      "rationale": "Why you rejected or selected this specific article.",\n      "sources": ["URL1"]\n    }\n  ]\n}`;
 
       const groqFallback =
         "gsk_X9Ls4XpBJKKMEU" + "hEcRGZWGdyb3FYw5G98iiVJV437yFqSt0ToV0f";
@@ -80,29 +80,36 @@ module.exports = async (req, res) => {
       if (rawText.endsWith("```")) rawText = rawText.slice(0, -3);
 
       const llmOutput = JSON.parse(rawText.trim());
+      const evaluations =
+        llmOutput.evaluations ||
+        (Array.isArray(llmOutput) ? llmOutput : [llmOutput]);
 
-      let parsedText = llmOutput.text;
-      if (llmOutput.decision === "REJECT") {
-        parsedText = `[REJECTED] ${llmOutput.rationale || "Topic deemed irrelevant by editorial guidelines."}`;
-      }
+      for (const evalItem of evaluations) {
+        let parsedText = evalItem.text;
+        if (evalItem.decision === "REJECT") {
+          parsedText = `[REJECTED] ${evalItem.rationale || "Topic deemed irrelevant by editorial guidelines."}`;
+        }
 
-      const { error: insertError } = await supabase.from("Posts").insert([
-        {
-          agent_id: agentId,
-          text: parsedText || "No text generated.",
-          rationale: llmOutput.rationale,
-          sources: llmOutput.sources || [],
-        },
-      ]);
-      if (insertError)
-        await supabase.from("Posts").insert([
+        const { error: insertError } = await supabase.from("Posts").insert([
           {
-            agentId,
+            agent_id: agentId,
             text: parsedText || "No text generated.",
-            rationale: llmOutput.rationale,
-            sources: llmOutput.sources || [],
+            rationale: evalItem.rationale || "No rationale provided.",
+            sources: evalItem.sources || [],
           },
         ]);
+
+        if (insertError) {
+          await supabase.from("Posts").insert([
+            {
+              agentId,
+              text: parsedText || "No text generated.",
+              rationale: evalItem.rationale || "No rationale provided.",
+              sources: evalItem.sources || [],
+            },
+          ]);
+        }
+      }
     } catch (e) {
       console.error("Failed to generate instant post:", e);
     }
