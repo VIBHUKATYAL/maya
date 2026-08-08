@@ -111,7 +111,7 @@ module.exports = async (req, res) => {
             validationRejection ||
             evalData.rejection_reason ||
             "Rejected by strict editorial logic.";
-          const parsedText = `[REJECTED]\n**Topic:** ${evalData.topic || article.title}\n\n**Decision Score:** ${evalData.score || 0}/100\n**Evaluation:** ${combinedReason}`;
+          const parsedText = `[REJECTED]\n**Topic:** ${evalData.topic || article.title}\n\n**Why Rejected:**\n${combinedReason}`;
 
           const { error: insertError } = await supabase.from("Posts").insert([
             {
@@ -167,7 +167,7 @@ module.exports = async (req, res) => {
           generatedText = rawWrite;
         }
 
-        const rationaleOutput = `**Score:** ${evalData.score || 0}/100 | **Confidence:** ${evalData.confidence || 0}\n**Why Selected:** ${evalData.why_selected}\n**Relevance:** ${evalData.why_relevant_now}`;
+        const rationaleOutput = `**Why Selected:** ${evalData.why_selected}\n**Relevance:** ${evalData.why_relevant_now}`;
 
         const { error: insertError } = await supabase.from("Posts").insert([
           {
