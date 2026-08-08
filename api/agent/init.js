@@ -147,13 +147,13 @@ module.exports = async (req, res) => {
               validationRejection ||
               evalData.rejection_reason ||
               "Rejected by strict editorial logic.";
-            const parsedText = `[REJECTED]\n**Topic:** ${evalData.topic || article.title}\n\n**Why Rejected:**\n${combinedReason}`;
+            const parsedText = `[REJECTED]\n**Topic:** ${evalData.topic || article.title}\n\n**Why Rejected:** ${combinedReason}`;
 
             const { error: insertError } = await supabase.from("Posts").insert([
               {
                 agent_id: agentId,
                 text: parsedText,
-                rationale: `Rejected evaluation.`,
+                rationale: combinedReason,
                 sources: [article.url],
               },
             ]);
@@ -162,7 +162,7 @@ module.exports = async (req, res) => {
                 {
                   agentId,
                   text: parsedText,
-                  rationale: `Rejected evaluation.`,
+                  rationale: combinedReason,
                   sources: [article.url],
                 },
               ]);
