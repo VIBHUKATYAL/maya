@@ -59,6 +59,7 @@ module.exports = async (req, res) => {
             .slice(0, 2);
 
           let postPublished = false;
+          let groqEvals = 0;
 
           // Pull Memory to prevent repeating content!
           // Pull Memory to prevent repeating content!
@@ -137,6 +138,14 @@ module.exports = async (req, res) => {
                 );
                 continue; // HARD SKIP! Never hits the LLM prompt.
               }
+
+              if (groqEvals >= 2) {
+                debugLogs.push(
+                  `Throttling execution early to prevent Vercel Timeout limit.`,
+                );
+                break; // Break the inner article evaluation loop!
+              }
+              groqEvals++;
 
               debugLogs.push(
                 `Evaluating article sequentially via Groq: ${article.title}`,

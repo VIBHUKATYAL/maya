@@ -7,7 +7,13 @@ module.exports = async (req, res) => {
   if (req.method === "OPTIONS") return res.status(204).end();
 
   try {
-    const { agentId } = JSON.parse(req.body);
+    let agentId;
+    if (typeof req.body === "string") {
+      agentId = JSON.parse(req.body).agentId;
+    } else {
+      agentId = req.body.agentId;
+    }
+
     const supabase = createClient(
       process.env.SUPABASE_URL,
       process.env.SUPABASE_KEY,
