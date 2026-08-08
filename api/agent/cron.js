@@ -48,14 +48,25 @@ module.exports = async (req, res) => {
           // Pull Memory to prevent repeating content!
           const { data: posts } = await supabase
             .from("Posts")
-            .select("text")
+            .select("text, rationale")
             .eq("agent_id", agent.id)
             .order("created_at", { ascending: false })
-            .limit(4);
+            .limit(6);
 
           const memoryContext =
             posts && posts.length > 0
-              ? posts.map((p) => `- ${p.text.substring(0, 50)}...`).join("\\n")
+              ? posts
+                  .map((p) => {
+                    const isRejected = p.text.startsWith("[REJECTED]");
+                    const type = isRejected
+                      ? "PREVIOUSLY REJECTED"
+                      : "PREVIOUSLY PUBLISHED";
+                    const snippet = p.text
+                      .substring(0, 80)
+                      .replace(/\\n/g, " ");
+                    return `[${type}] ${snippet} | Editor Note: ${p.rationale}`;
+                  })
+                  .join("\n")
               : "No previous posts.";
 
           const groqFallback =
@@ -66,7 +77,7 @@ module.exports = async (req, res) => {
             debugLogs.push(
               `Evaluating article sequentially via Groq: ${article.title}`,
             );
-            const evalPrompt = `### ROLE ###\nYou are a senior AI editorial architect formatting data for ${persona.name}.\nYour job is STRICT EDITORIAL EVALUATION. \nDetermine if the following article is worth publishing for the sector: ${domain}\n\n### EDITORIAL STANDARDS ###\n- Relevance: Does this matter right now?\n- Evidence Quality: Are there credible sources?\n- Novelty: Is this a duplicate?\n\n### ARTICLE TO EVALUATE ###\nTitle: ${article.title}\nContent: ${article.content}\nURL: ${article.url}\n\n### RECENT PUBLISHED MEMORY ###\n${memoryContext}\n\n### OUTPUT FORMAT ###\nYou MUST output valid JSON exactly matching this schema:\n{\n  "decision": "PUBLISH" | "REJECT",\n  "score": 0-100,\n  "confidence": 0.0-1.0,\n  "reasoning": {\n    "relevance": "string",\n    "evidence_quality": "string",\n    "novelty": "string"\n  },\n  "why_selected": "string (null if rejected)",\n  "why_relevant_now": "string (null if rejected)",\n  "sources": [{"title": "article title", "url": "article url"}],\n  "rejection_reason": "string (null if published)",\n  "topic": "Extracted Headline"\n}`;
+            const evalPrompt = `### ROLE ###\nYou are a senior AI editorial architect formatting data for ${persona.name}.\nYour job is STRICT EDITORIAL EVALUATION. \nDetermine if the following article is worth publishing for the sector: ${domain}\n\n### EDITORIAL STANDARDS ###\n- Relevance: Does this matter right now?\n- Evidence Quality: Are there credible sources?\n- Novelty: Is this a duplicate?\n- Continuity: Is this a powerful follow-up to a PREVIOUSLY PUBLISHED topic? (If yes, heavily favor publishing it as an update). NEVER publish something overlapping a PREVIOUSLY REJECTED topic unless there is massive new evidence.\n\n### ARTICLE TO EVALUATE ###\nTitle: ${article.title}\nContent: ${article.content}\nURL: ${article.url}\n\n### RECENT MEMORY (PUBLISHED & REJECTED) ###\n${memoryContext}\n\n### OUTPUT FORMAT ###\nYou MUST output valid JSON exactly matching this schema:\n{\n  "decision": "PUBLISH" | "REJECT",\n  "score": 0-100,\n  "confidence": 0.0-1.0,\n  "reasoning": {\n    "relevance": "string",\n    "evidence_quality": "string",\n    "novelty": "string"\n  },\n  "why_selected": "string (null if rejected)",\n  "why_relevant_now": "string (null if rejected)",\n  "sources": [{"title": "article title", "url": "article url"}],\n  "rejection_reason": "string (null if published)",\n  "topic": "Extracted Headline"\n}`;
 
             const evalFetch = await fetch(
               "https://api.groq.com/openai/v1/chat/completions",
