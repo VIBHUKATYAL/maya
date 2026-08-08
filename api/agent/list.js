@@ -16,8 +16,17 @@ module.exports = async (req, res) => {
       .select("*")
       .order("created_at", { ascending: false });
 
+    const { count: globalPostsCount, error: countError } = await supabase
+      .from("Posts")
+      .select("*", { count: "exact", head: true });
+
     if (error) throw error;
-    return res.status(200).json({ agents: data });
+    if (countError) throw countError;
+
+    return res.status(200).json({
+      agents: data,
+      globalPostsCount: globalPostsCount || 0,
+    });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

@@ -474,27 +474,17 @@
             <div class="grid-lines pointer-events-none absolute inset-0 opacity-30" style="position: absolute; inset: 0; pointer-events: none; opacity: 0.3;"></div>
             
             <div class="relative flex flex-col gap-3" style="position: relative; display: flex; flex-direction: column; gap: 14px;">
-              <!-- API 1: Groq LLM -->
-              <div class="flex items-center justify-between" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
-                <p class="text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground flex items-center gap-1.5" style="font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #94a3b8;">
-                  Tavily Key 1
-                </p>
-                <p class="font-mono text-[1.1rem] font-extrabold leading-none text-foreground truncate" style="font-size: 1.1rem; font-weight: 800; line-height: 1;">
-                  <span id="metricTokensVal">0</span><span class="ml-1 text-[0.65rem] font-semibold text-muted-foreground" style="margin-left: 4px; font-size: 0.65rem; font-weight: 600; color: #64748b;">/ 1000</span>
-                </p>
-              </div>
-
-              <!-- API 2: Tavily Search -->
+              <!-- API: Tavily Search -->
               <div class="flex items-center justify-between" style="display: flex; justify-content: space-between; align-items: center;">
                 <p class="text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground flex items-center gap-1.5" style="font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #94a3b8;">
-                  Tavily Key 2
+                  Tavily Search API
                 </p>
                 <p class="font-mono text-[1.1rem] font-extrabold leading-none text-foreground truncate" style="font-size: 1.1rem; font-weight: 800; line-height: 1;">
-                  <span id="metricTavilyVal">0</span><span class="ml-1 text-[0.65rem] font-semibold text-muted-foreground" style="margin-left: 4px; font-size: 0.65rem; font-weight: 600; color: #64748b;">/ 1000</span>
+                  <span id="metricTavilyVal">0</span><span class="ml-1 text-[0.65rem] font-semibold text-primary" style="margin-left: 4px; font-size: 0.65rem; font-weight: 600; color: #38bdf8;">/ 2000 total req</span>
                 </p>
               </div>
             </div>
-            <p class="relative mt-3 text-[0.68rem] text-muted-foreground" id="metricTokensSub" style="position: relative; margin-top: 14px; font-size: 0.68rem; color: #94a3b8; text-align: center;">Total consumption across published posts</p>
+            <p class="relative mt-3 text-[0.68rem] text-muted-foreground" id="metricTokensSub" style="position: relative; margin-top: 14px; font-size: 0.68rem; color: #94a3b8; text-align: center;">Lifetime consumption across all keys</p>
           </div>
 
           <!-- Active Agents Card -->
@@ -1245,15 +1235,8 @@
           document.getElementById('metricSourcesCount').textContent = totalSrc;
           document.getElementById('metricSourcesSub').textContent = `${totalSrc} research sources across ${domains} news domain${domains === 1 ? '' : 's'} • Click to view`;
 
-          // Real Global LLM Tokens Calculation (Input Prompts + Output Generations)
-          cachedTotalTok = globalPosts.reduce((acc, p) => {
-            const textChars = (p.text || '').length;
-            const rationaleChars = (p.rationale || '').length;
-            const outputTok = Math.round((textChars + rationaleChars) / 3.8);
-            const inputTok = 1150 + ((p.sources || []).length * 45);
-            return acc + inputTok + outputTok;
-          }, 0);
-          cachedPostsCount = globalPosts.length;
+          // Extract True Global Lifetime Posts Count (including deleted agents)
+          cachedPostsCount = data.globalPostsCount !== undefined ? data.globalPostsCount : globalPosts.length;
           renderTokenMetric();
 
           if (!grid) return;
@@ -1684,28 +1667,15 @@
       function toggleTokenMetric() {}
 
       function renderTokenMetric() {
-        const llmVal = document.getElementById('metricTokensVal');
         const tavVal = document.getElementById('metricTavilyVal');
-        const sub = document.getElementById('metricTokensSub');
-
-        const tav1 = Math.floor(cachedPostsCount / 2);
-        const tav2 = Math.ceil(cachedPostsCount / 2);
-
-        if (llmVal) {
-          llmVal.textContent = tav1.toLocaleString('en-IN');
-        }
         if (tavVal) {
-          tavVal.textContent = tav2.toLocaleString('en-IN');
-        }
-        if (sub) {
-            sub.textContent = `Est. load balancing across ${cachedPostsCount} total requests.`;
+          tavVal.textContent = cachedPostsCount.toLocaleString('en-IN');
         }
       }
 
       /* ---------- Update Telemetry ---------- */
       function updateTelemetry(posts, totalTok = 0, totalSources = 0) {
-        cachedTotalTok = posts.length ? totalTok : 0;
-        cachedPostsCount = posts.length;
+        // Do not overwrite cachedPostsCount here to prevent corrupting the global lifetime metrics when viewing an individual agent feed
         renderTokenMetric();
 
         document.getElementById('metricSourcesCount').textContent = totalSources;
