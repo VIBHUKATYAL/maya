@@ -1,6 +1,6 @@
 const { createClient } = require("@supabase/supabase-js");
 const { tavily } = require("@tavily/core");
-const { getStylePrompt } = require("./prompts.js");
+const { getStylePrompt } = require("../../lib/prompts.js");
 
 module.exports = async (req, res) => {
   // CORS Configuration

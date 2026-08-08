@@ -1,7 +1,7 @@
 const { createClient } = require("@supabase/supabase-js");
 const { tavily } = require("@tavily/core");
-const { getStylePrompt } = require("./prompts.js");
-const { getEditorialPrompt } = require("./prompts/editorale.js");
+const { getStylePrompt } = require("../../lib/prompts.js");
+const { getEditorialPrompt } = require("../../lib/prompts/editorale.js");
 
 module.exports = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
