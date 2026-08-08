@@ -7,7 +7,6 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.21.0",
     "@netlify/functions": "^2.8.2",
     "@supabase/supabase-js": "^2.45.6",
     "@tavily/core": "^0.3.1"

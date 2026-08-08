@@ -1,5 +1,4 @@
 const { createClient } = require("@supabase/supabase-js");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { tavily } = require("@tavily/core");
 const { getStylePrompt } = require("./prompts.js");
 const { getEditorialPrompt } = require("./prompts/editorale.js");
@@ -9,7 +8,13 @@ module.exports = async (req, res) => {
   const debugLogs = [];
 
   try {
-    const { SUPABASE_URL, SUPABASE_KEY, TAVILY_API_KEY } = process.env;
+    const { SUPABASE_URL, SUPABASE_KEY } = process.env;
+    const tvlyKeys = (process.env.TAVILY_API_KEY || "tvly-kX03O8N")
+      .split(",")
+      .map((k) => k.trim());
+    const TAVILY_API_KEY =
+      tvlyKeys[Math.floor(Math.random() * tvlyKeys.length)];
+
     if (!SUPABASE_URL || !SUPABASE_KEY || !TAVILY_API_KEY) {
       return res
         .status(500)
@@ -89,7 +94,11 @@ module.exports = async (req, res) => {
 
           const groqFallback =
             "gsk_X9Ls4XpBJKKMEU" + "hEcRGZWGdyb3FYw5G98iiVJV437yFqSt0ToV0f";
-          const GROQ_API_KEY = process.env.GROQ_API_KEY || groqFallback;
+          const groqKeys = (process.env.GROQ_API_KEY || groqFallback)
+            .split(",")
+            .map((k) => k.trim());
+          const GROQ_API_KEY =
+            groqKeys[Math.floor(Math.random() * groqKeys.length)];
 
           for (const query of searchQueries) {
             if (postPublished) break; // Break outer loop completely if we found a good post!
