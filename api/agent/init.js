@@ -43,14 +43,14 @@ module.exports = async (req, res) => {
     // 2. 🔥 INSTANTLY GENERATE FIRST POST (Seed the feed)
     try {
       const allQueries = [
-        `Latest breaking news and developments in ${persona.domain}`,
-        `Untold stories, deep dives, and highly engaging evergreen topics regarding ${persona.domain}`,
-        `Recent controversies and ethical debates in ${persona.domain}`,
-        `Future predictions, breakthroughs, and trends in ${persona.domain}`,
-        `Unexpected applications and startup innovations in ${persona.domain}`,
-        `Regulatory changes, policy, and government impact on ${persona.domain}`,
-        `Behind the scenes interviews and executive leadership in ${persona.domain}`,
-        `Major investments, funding rounds, and acquisitions in ${persona.domain}`,
+        `Latest breaking research, vulnerabilities, and technical developments in ${persona.domain}`,
+        `Distinct editorial opinions, deep dives, and expert analysis regarding ${persona.domain}`,
+        `Controversial debates, ethical concerns, and regulatory shifts in ${persona.domain}`,
+        `Future predictions, architectural changes, and scaling trends in ${persona.domain}`,
+        `Open-source contributions, developer tools, and practical implementations of ${persona.domain}`,
+        `Real-world case studies, product analytics, and startup innovations in ${persona.domain}`,
+        `Adversarial attacks, safety frameworks, and security research in ${persona.domain}`,
+        `Behind the scenes engineering challenges and executive strategy in ${persona.domain}`,
       ];
       // Shuffle and pick 2 randomly
       const searchQueries = allQueries
@@ -173,7 +173,7 @@ module.exports = async (req, res) => {
             .substring(0, 2500)
             .concat("...");
 
-          const writePrompt = `### ROLE ###\nYou are an autonomous AI content creator for: ${persona.name}.\nYou have just received an approved editorial topic. Your ONLY job is to write the post based on the Editor's exact rationale, STRICTLY following the Writing Style Rules below.\n\n### EDITOR'S RATIONALE ###\nTopic: ${evalData.topic || article.title}\nWhy it was selected: ${evalData.why_selected}\nRelevance: ${evalData.why_relevant_now}\n\n### ARTICLE CONTEXT ###\nTitle: ${article.title}\nContent: ${safeWriteContent}\nURL: ${article.url}\n\n${styleRules}\n\n### OUTPUT FORMAT ###\nOutput ONLY valid JSON:\n{\n  "text": "The final structured markdown text following the provided writing style perfectly, without any forced emojis."\n}`;
+          const writePrompt = `### ROLE ###\nYou are ${persona.name}, a highly opinionated expert in ${persona.domain}.\nMaintain stable interests, a coherent voice, and distinct editorial opinions relevant to your domain.\nYou have just received an approved editorial topic. Your ONLY job is to write the post based on the Editor's exact rationale, STRICTLY following the Writing Style Rules below.\n\n### EDITOR'S RATIONALE ###\nTopic: ${evalData.topic || article.title}\nWhy it was selected: ${evalData.why_selected}\nRelevance: ${evalData.why_relevant_now}\n\n### ARTICLE CONTEXT ###\nTitle: ${article.title}\nContent: ${safeWriteContent}\nURL: ${article.url}\n\n${styleRules}\n\n### OUTPUT FORMAT ###\nOutput ONLY valid JSON:\n{\n  "text": "The final structured markdown text following the provided writing style perfectly, without any forced emojis."\n}`;
 
           // THROTTLE BEFORE GENERATION CALL TO PROTECT RATE LIMIT
           await new Promise((resolve) => setTimeout(resolve, 900));

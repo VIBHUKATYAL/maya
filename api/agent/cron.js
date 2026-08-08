@@ -37,14 +37,14 @@ module.exports = async (req, res) => {
           const domain = persona.domain || "Technology";
 
           const allQueries = [
-            `Latest breaking news and developments in ${domain}`,
-            `Untold stories, deep dives, and highly engaging evergreen topics regarding ${domain}`,
-            `Recent controversies and ethical debates in ${domain}`,
-            `Future predictions, breakthroughs, and trends in ${domain}`,
-            `Unexpected applications and startup innovations in ${domain}`,
-            `Regulatory changes, policy, and government impact on ${domain}`,
-            `Behind the scenes interviews and executive leadership in ${domain}`,
-            `Major investments, funding rounds, and acquisitions in ${domain}`,
+            `Latest breaking research, vulnerabilities, and technical developments in ${domain}`,
+            `Distinct editorial opinions, deep dives, and expert analysis regarding ${domain}`,
+            `Controversial debates, ethical concerns, and regulatory shifts in ${domain}`,
+            `Future predictions, architectural changes, and scaling trends in ${domain}`,
+            `Open-source contributions, developer tools, and practical implementations of ${domain}`,
+            `Real-world case studies, product analytics, and startup innovations in ${domain}`,
+            `Adversarial attacks, safety frameworks, and security research in ${domain}`,
+            `Behind the scenes engineering challenges and executive strategy in ${domain}`,
           ];
           // Shuffle and pick 2 randomly
           const searchQueries = allQueries
@@ -246,7 +246,7 @@ module.exports = async (req, res) => {
                 .substring(0, 2500)
                 .concat("...");
 
-              const writePrompt = `### ROLE ###\nYou are an autonomous AI content creator for: ${persona.name}.\nYou have just received an approved editorial topic. Your ONLY job is to write the post based on the Editor's exact rationale, STRICTLY following the Writing Style Rules below.\n\n### EDITOR'S RATIONALE ###\nTopic: ${evalData.topic || article.title}\nWhy it was selected: ${evalData.why_selected}\nRelevance: ${evalData.why_relevant_now}\n\n### ARTICLE CONTEXT ###\nTitle: ${article.title}\nContent: ${safeWriteContent}\nURL: ${article.url}\n\n${styleRules}\n\n### OUTPUT FORMAT ###\nOutput ONLY valid JSON:\n{\n  "text": "The final structured markdown text following the provided writing style perfectly, without any forced emojis."\n}`;
+              const writePrompt = `### ROLE ###\nYou are ${persona.name}, a highly opinionated expert in ${domain}.\nMaintain stable interests, a coherent voice, and distinct editorial opinions relevant to your domain.\nYou have just received an approved editorial topic. Your ONLY job is to write the post based on the Editor's exact rationale, STRICTLY following the Writing Style Rules below.\n\n### EDITOR'S RATIONALE ###\nTopic: ${evalData.topic || article.title}\nWhy it was selected: ${evalData.why_selected}\nRelevance: ${evalData.why_relevant_now}\n\n### ARTICLE CONTEXT ###\nTitle: ${article.title}\nContent: ${safeWriteContent}\nURL: ${article.url}\n\n${styleRules}\n\n### OUTPUT FORMAT ###\nOutput ONLY valid JSON:\n{\n  "text": "The final structured markdown text following the provided writing style perfectly, without any forced emojis."\n}`;
 
               // THROTTLE TO PREVENT GROQ 429 RATE LIMITS (Max 30 requests/min free tier)
               await new Promise((resolve) => setTimeout(resolve, 900));
