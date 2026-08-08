@@ -48,7 +48,7 @@ module.exports = async (req, res) => {
       const newsContext = searchResponse.results
         .map((r) => `Title: ${r.title}\nContent: ${r.content}\nURL: ${r.url}`)
         .join("\n\n");
-      const prompt = `### ROLE ###\nYou are an autonomous AI content creator. Your persona:\n- Name: ${persona.name}\n- Domain/Focus: ${persona.domain}\n\n### TASK ###\nReview the live news articles provided and exercise STRICT EDITORIAL JUDGEMENT. You must evaluate EACH article individually. Reject the boring/duplicate ones, and only PUBLISH the single most fascinating topic.\n\n### EDITORIAL GUIDELINES ###\n1. For the ONE article you choose to PUBLISH, ALWAYS start with a **BOLD, CATCHY, YOUTUBER-STYLE CLICKBAIT TITLE** surrounded in double asterisks. (e.g. **Wait... AI Just Did WHAT!? 🤯**)\n2. Below the title, provide a highly structured breakdown using emojis and distinct bullet points.\n3. Rationale MUST explicitly state why you rejected or selected each specific topic.\n\n### LIVE NEWS SOURCES ###\n${newsContext}\n\n### OUTPUT FORMAT ###\nYou MUST output valid raw JSON matching this EXACT schema array:\n{\n  "evaluations": [\n    {\n      "decision": "PUBLISH" | "REJECT",\n      "text": "The properly formatted markdown post content (Leave empty if REJECT).",\n      "rationale": "Why you rejected or selected this specific article.",\n      "sources": ["URL1"]\n    }\n  ]\n}`;
+      const prompt = `### ROLE ###\nYou are an autonomous AI content creator. Your persona:\n- Name: ${persona.name}\n- Domain/Focus: ${persona.domain}\n\n### TASK ###\nReview the live news articles provided and exercise STRICT EDITORIAL JUDGEMENT. You must evaluate EACH article individually. Reject the boring/duplicate ones, and only PUBLISH the single most fascinating topic.\n\n### EDITORIAL GUIDELINES ###\n1. For the ONE article you choose to PUBLISH, ALWAYS start with a **BOLD, CATCHY, YOUTUBER-STYLE CLICKBAIT TITLE** surrounded in double asterisks. (e.g. **Wait... AI Just Did WHAT!? 🤯**)\n2. Below the title, provide a highly structured breakdown using emojis and distinct bullet points.\n3. Rationale MUST explicitly state why you rejected or selected each specific topic.\n\n### LIVE NEWS SOURCES ###\n${newsContext}\n\n### OUTPUT FORMAT ###\nYou MUST output valid raw JSON matching this EXACT schema array:\n{\n  "evaluations": [\n    {\n      "topic": "Extract the headline of the article",\n      "decision": "PUBLISH" | "REJECT",\n      "text": "The properly formatted markdown post content (Leave empty if REJECT).",\n      "rationale": "If PUBLISHED, short reason. If REJECTED, you MUST provide exactly this format:\\n**Why Rejected:** [reason]\\n**Why it is not worth publishing:** [reason]\\n**Source Trust:** [Untrusted/Controversial/Safe]",\n      "sources": ["URL1"]\n    }\n  ]\n}`;
 
       const groqFallback =
         "gsk_X9Ls4XpBJKKMEU" + "hEcRGZWGdyb3FYw5G98iiVJV437yFqSt0ToV0f";
@@ -87,7 +87,7 @@ module.exports = async (req, res) => {
       for (const evalItem of evaluations) {
         let parsedText = evalItem.text;
         if (evalItem.decision === "REJECT") {
-          parsedText = `[REJECTED] ${evalItem.rationale || "Topic deemed irrelevant by editorial guidelines."}`;
+          parsedText = `[REJECTED]\n**Topic:** ${evalItem.topic}\n\n${evalItem.rationale || "Rejected based on editorial limits."}`;
         }
 
         const { error: insertError } = await supabase.from("Posts").insert([
