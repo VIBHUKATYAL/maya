@@ -260,7 +260,7 @@ module.exports = async (req, res) => {
 
               // GENERATION PHASE!
               const styleRules = getStylePrompt(
-                persona.writingStyle || "Tech Storytelling",
+                persona.style || persona.writingStyle || "Tech Storytelling",
               );
 
               const safeWriteContent = (article.content || "")
