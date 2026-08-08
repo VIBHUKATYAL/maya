@@ -147,6 +147,13 @@
       box-shadow: 0 16px 40px -5px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
     }
 
+    .agent-card-hover:hover {
+      transform: translateY(-5px) scale(1.02) !important;
+      border-color: rgba(56, 189, 248, 0.9) !important;
+      box-shadow: 0 0 45px rgba(56, 189, 248, 0.45) !important;
+      z-index: 10;
+    }
+
     .grid-lines {
       background-image:
         linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
@@ -1255,7 +1262,7 @@
               : 'border: 1px solid rgba(255, 255, 255, 0.1); background: linear-gradient(160deg, rgba(22, 30, 49, 0.65) 0%, rgba(14, 19, 32, 0.8) 100%);';
 
             return `
-              <div class="panel flex flex-col justify-between transition-all duration-300 hover:-translate-y-2 hover:scale-[1.02] hover:border-primary/80 hover:shadow-[0_0_35px_rgba(56,189,248,0.45)]" style="display: flex; flex-direction: column; justify-content: space-between; border-radius: 16px; padding: 22px 24px; ${cardBorderClass} transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);">
+              <div class="panel agent-card-hover flex flex-col justify-between transition-all duration-300" style="display: flex; flex-direction: column; justify-content: space-between; border-radius: 16px; padding: 22px 24px; ${cardBorderClass} transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);">
                 <div>
                   <div class="flex items-center justify-between gap-3 pb-3 border-b border-white/10" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.07); padding-bottom: 12px;">
                     <div onclick="openAgentFeed('${agent.id}', '${escapeHTML(pName)}', '${escapeHTML(pDomain)}')" class="flex items-center gap-2.5 cursor-pointer flex-1 min-w-0" style="display: flex; align-items: center; gap: 10px; min-width: 0; cursor: pointer; flex: 1;">
@@ -1876,7 +1883,7 @@
           const pDomain = toTitleCase(persona.domain || 'General');
           const styleName = persona.style || 'Tech Storytelling';
           return `
-            <div onclick="closeLiveAgentsModal(); openAgentFeed('${agent.id}', '${escapeHTML(pName)}', '${escapeHTML(pDomain)}')" class="flex items-center justify-between gap-4 p-4 rounded-xl border border-white/10 bg-slate-950/70 transition-all hover:-translate-y-1 hover:scale-[1.01] hover:border-emerald-500/80 hover:shadow-[0_0_30px_rgba(52,211,153,0.35)] hover:bg-slate-900/90 cursor-pointer" style="display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 18px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); background: rgba(11,17,30,0.7); cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+            <div onclick="closeLiveAgentsModal(); openAgentFeed('${agent.id}', '${escapeHTML(pName)}', '${escapeHTML(pDomain)}')" class="agent-card-hover flex items-center justify-between gap-4 p-4 rounded-xl border border-white/10 bg-slate-950/70 transition-all cursor-pointer" style="display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 18px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); background: rgba(11,17,30,0.7); cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
               <div class="flex items-center gap-3 min-w-0 flex-1" style="display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1;">
                 <span class="live-dot size-2.5 rounded-full bg-emerald-400 shrink-0" style="width: 10px; height: 10px; border-radius: 50%; background: #34d399; flex-shrink: 0;"></span>
                 <div class="min-w-0 flex-1" style="min-width: 0; flex: 1;">
