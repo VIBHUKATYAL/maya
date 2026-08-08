@@ -2003,18 +2003,10 @@
         }
       }
 
-      async function refreshAll() {
+      function refreshAll() {
         const icon = document.getElementById('refreshIcon');
         if (icon) icon.classList.add('animate-spin');
-        
-        try {
-          await Promise.all([
-            loadAgents(),
-            currentAgentId ? fetchFeed() : Promise.resolve()
-          ]);
-        } finally {
-          if (icon) icon.classList.remove('animate-spin');
-        }
+        window.location.reload();
       }
 
       /* ---------- Sources Modal Logic ---------- */
