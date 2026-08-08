@@ -477,20 +477,20 @@
               <!-- API 1: Groq LLM -->
               <div class="flex items-center justify-between" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
                 <p class="text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground flex items-center gap-1.5" style="font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #94a3b8;">
-                  API 1: Groq
+                  Tavily Key 1
                 </p>
                 <p class="font-mono text-[1.1rem] font-extrabold leading-none text-foreground truncate" style="font-size: 1.1rem; font-weight: 800; line-height: 1;">
-                  <span id="metricTokensVal">0</span><span class="ml-1.5 text-[0.65rem] font-semibold text-primary" style="margin-left: 6px; font-size: 0.65rem; font-weight: 600; color: #38bdf8;">tok</span>
+                  <span id="metricTokensVal">0</span><span class="ml-1 text-[0.65rem] font-semibold text-muted-foreground" style="margin-left: 4px; font-size: 0.65rem; font-weight: 600; color: #64748b;">/ 1000</span>
                 </p>
               </div>
 
               <!-- API 2: Tavily Search -->
               <div class="flex items-center justify-between" style="display: flex; justify-content: space-between; align-items: center;">
                 <p class="text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground flex items-center gap-1.5" style="font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #94a3b8;">
-                  API 2: Tavily
+                  Tavily Key 2
                 </p>
                 <p class="font-mono text-[1.1rem] font-extrabold leading-none text-foreground truncate" style="font-size: 1.1rem; font-weight: 800; line-height: 1;">
-                  <span id="metricTavilyVal">0</span><span class="ml-1.5 text-[0.65rem] font-semibold text-primary" style="margin-left: 6px; font-size: 0.65rem; font-weight: 600; color: #38bdf8;">req</span>
+                  <span id="metricTavilyVal">0</span><span class="ml-1 text-[0.65rem] font-semibold text-muted-foreground" style="margin-left: 4px; font-size: 0.65rem; font-weight: 600; color: #64748b;">/ 1000</span>
                 </p>
               </div>
             </div>
@@ -1688,14 +1688,17 @@
         const tavVal = document.getElementById('metricTavilyVal');
         const sub = document.getElementById('metricTokensSub');
 
+        const tav1 = Math.floor(cachedPostsCount / 2);
+        const tav2 = Math.ceil(cachedPostsCount / 2);
+
         if (llmVal) {
-          llmVal.textContent = cachedTotalTok.toLocaleString('en-IN');
+          llmVal.textContent = tav1.toLocaleString('en-IN');
         }
         if (tavVal) {
-          tavVal.textContent = cachedPostsCount.toLocaleString('en-IN');
+          tavVal.textContent = tav2.toLocaleString('en-IN');
         }
         if (sub) {
-            sub.textContent = `Total consumption across ${cachedPostsCount} published posts`;
+            sub.textContent = `Est. load balancing across ${cachedPostsCount} total requests.`;
         }
       }
 
