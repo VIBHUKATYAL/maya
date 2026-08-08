@@ -34,7 +34,14 @@ module.exports = async (req, res) => {
           const persona = agent.persona || {};
           if (persona.isActive === false) return; // SKIP PAUSED AGENTS
           debugLogs.push(`Starting agent ${agent.id}`);
-          const domain = persona.domain || "Technology";
+          const rawDomain = persona.domain || "Technology";
+          const domainList = rawDomain
+            .split(",")
+            .map((d) => d.trim())
+            .filter(Boolean);
+          const domain =
+            domainList[Math.floor(Math.random() * domainList.length)] ||
+            "Technology";
 
           const allQueries = [
             `Latest breaking research, vulnerabilities, and technical developments in ${domain}`,
