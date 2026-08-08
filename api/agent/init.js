@@ -175,7 +175,12 @@ module.exports = async (req, res) => {
 
           let generatedText = article.title;
           try {
-            generatedText = JSON.parse(rawWrite.trim()).text;
+            const parsedWrite = JSON.parse(rawWrite.trim());
+            generatedText =
+              parsedWrite.text ||
+              parsedWrite.post ||
+              parsedWrite.content ||
+              rawWrite;
           } catch (e) {
             generatedText = rawWrite;
           }
