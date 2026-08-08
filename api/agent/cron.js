@@ -83,6 +83,42 @@ module.exports = async (req, res) => {
             if (!searchResponse || !searchResponse.results) continue;
 
             for (const article of searchResponse.results) {
+              // PROGRAMMATIC DUPLICATE FILTERING (JACCARD ALGORITHM)
+              const getKeywords = (text) => {
+                const words = (text || "")
+                  .toLowerCase()
+                  .replace(/[^a-z0-9\s]/g, "")
+                  .split(/\s+/);
+                return new Set(words.filter((w) => w.length > 4)); // Only significant words
+              };
+
+              const articleKeywords = getKeywords(article.title);
+              let isExactDuplicate = false;
+
+              if (posts && posts.length > 0) {
+                for (const post of posts) {
+                  const postKeywords = getKeywords(post.text);
+                  let overlap = 0;
+                  for (const word of articleKeywords) {
+                    if (postKeywords.has(word)) overlap++;
+                  }
+                  const similarity =
+                    overlap / Math.max(1, articleKeywords.size);
+                  // If 40% of the significant words in the title match an existing post, it's a recycled story!
+                  if (similarity > 0.4) {
+                    isExactDuplicate = true;
+                    break;
+                  }
+                }
+              }
+
+              if (isExactDuplicate) {
+                debugLogs.push(
+                  `Blocked Duplicate Algorithmically: ${article.title}`,
+                );
+                continue; // HARD SKIP! Never hits the LLM prompt.
+              }
+
               debugLogs.push(
                 `Evaluating article sequentially via Groq: ${article.title}`,
               );
