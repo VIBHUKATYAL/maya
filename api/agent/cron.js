@@ -12,17 +12,16 @@ module.exports = async (req, res) => {
     const tvlyKeys = (process.env.TAVILY_API_KEY || "tvly-kX03O8N")
       .split(",")
       .map((k) => k.trim());
-    const TAVILY_API_KEY =
+    const getTvlyKey = () =>
       tvlyKeys[Math.floor(Math.random() * tvlyKeys.length)];
 
-    if (!SUPABASE_URL || !SUPABASE_KEY || !TAVILY_API_KEY) {
+    if (!SUPABASE_URL || !SUPABASE_KEY) {
       return res
         .status(500)
         .json({ error: "Missing required Vercel Environment Variables!" });
     }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-    const tvly = tavily({ apiKey: TAVILY_API_KEY });
 
     const { data: agents, error: agentFetchError } = await supabase
       .from("Agents")
@@ -68,7 +67,6 @@ module.exports = async (req, res) => {
           let groqEvals = 0;
 
           // Pull Memory to prevent repeating content!
-          // Pull Memory to prevent repeating content!
           const { data: posts } = await supabase
             .from("Posts")
             .select("text, rationale")
@@ -97,11 +95,12 @@ module.exports = async (req, res) => {
           const groqKeys = (process.env.GROQ_API_KEY || groqFallback)
             .split(",")
             .map((k) => k.trim());
-          const GROQ_API_KEY =
+          const getGroqKey = () =>
             groqKeys[Math.floor(Math.random() * groqKeys.length)];
 
           for (const query of searchQueries) {
             if (postPublished) break; // Break outer loop completely if we found a good post!
+            const tvly = tavily({ apiKey: getTvlyKey() });
 
             debugLogs.push(`Searching Tavily for: ${query}`);
             const searchResponse = await tvly.search(query, {
@@ -185,7 +184,7 @@ module.exports = async (req, res) => {
                 {
                   method: "POST",
                   headers: {
-                    Authorization: `Bearer ${GROQ_API_KEY}`,
+                    Authorization: `Bearer ${getGroqKey()}`,
                     "Content-Type": "application/json",
                   },
                   body: JSON.stringify({
@@ -292,7 +291,7 @@ module.exports = async (req, res) => {
                 {
                   method: "POST",
                   headers: {
-                    Authorization: `Bearer ${GROQ_API_KEY}`,
+                    Authorization: `Bearer ${getGroqKey()}`,
                     "Content-Type": "application/json",
                   },
                   body: JSON.stringify({

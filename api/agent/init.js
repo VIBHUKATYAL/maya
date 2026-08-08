@@ -76,7 +76,7 @@ module.exports = async (req, res) => {
       const groqKeys = (process.env.GROQ_API_KEY || groqFallback)
         .split(",")
         .map((k) => k.trim());
-      const GROQ_API_KEY =
+      const getGroqKey = () =>
         groqKeys[Math.floor(Math.random() * groqKeys.length)];
 
       let postPublished = false;
@@ -106,7 +106,7 @@ module.exports = async (req, res) => {
             {
               method: "POST",
               headers: {
-                Authorization: `Bearer ${GROQ_API_KEY}`,
+                Authorization: `Bearer ${getGroqKey()}`,
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
@@ -201,7 +201,7 @@ module.exports = async (req, res) => {
             {
               method: "POST",
               headers: {
-                Authorization: `Bearer ${GROQ_API_KEY}`,
+                Authorization: `Bearer ${getGroqKey()}`,
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
