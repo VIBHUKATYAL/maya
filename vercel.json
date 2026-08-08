@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "api/agent/cron.js": {
+      "maxDuration": 60
+    },
+    "api/agent/init.js": {
+      "maxDuration": 60
+    }
+  }
+}
