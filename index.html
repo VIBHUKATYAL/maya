@@ -468,61 +468,33 @@
         <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
           style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px;">
 
-          <!-- Tokens Consumed / Remaining Card (Donut Chart) -->
-          <div onclick="toggleTokenMetric()"
-            class="panel relative overflow-hidden p-5 transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-[0_12px_30px_rgba(56,189,248,0.15)] cursor-pointer"
-            style="position: relative; overflow: hidden; padding: 22px; cursor: pointer; border-top: 2px solid #38bdf8; background: linear-gradient(160deg, rgba(22, 30, 49, 0.8) 0%, rgba(14, 19, 32, 0.9) 100%);"
-            title="Click to toggle Tokens Consumed / Remaining / Tavily">
-            <div class="grid-lines pointer-events-none absolute inset-0 opacity-30"
-              style="position: absolute; inset: 0; pointer-events: none; opacity: 0.3;"></div>
-            <div class="relative flex items-center justify-between gap-3"
-              style="position: relative; display: flex; justify-content: space-between; align-items: center;">
-              <div class="flex-1 min-w-0" style="flex: 1; min-width: 0;">
-                <p class="text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground flex items-center gap-1.5"
-                  style="font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: #94a3b8;">
-                  <span id="metricTokensTitle">LLM Tokens consumed</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="lucide lucide-repeat text-primary/80" style="width: 12px; height: 12px; color: #38bdf8;">
-                    <path d="m17 2 4 4-4 4"></path>
-                    <path d="M3 11v-1a4 4 0 0 1 4-4h14"></path>
-                    <path d="m7 22-4-4 4-4"></path>
-                    <path d="M21 13v1a4 4 0 0 1-4 4H3"></path>
-                  </svg>
+          <!-- API Usage Card -->
+          <div class="panel relative overflow-hidden p-5 transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-[0_12px_30px_rgba(56,189,248,0.15)]"
+            style="position: relative; overflow: hidden; padding: 22px; border-top: 2px solid #38bdf8; background: linear-gradient(160deg, rgba(22, 30, 49, 0.8) 0%, rgba(14, 19, 32, 0.9) 100%);">
+            <div class="grid-lines pointer-events-none absolute inset-0 opacity-30" style="position: absolute; inset: 0; pointer-events: none; opacity: 0.3;"></div>
+            
+            <div class="relative flex flex-col gap-3" style="position: relative; display: flex; flex-direction: column; gap: 14px;">
+              <!-- API 1: Groq LLM -->
+              <div class="flex items-center justify-between" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
+                <p class="text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground flex items-center gap-1.5" style="font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #94a3b8;">
+                  API 1: Groq
                 </p>
-                <p class="mt-2 font-mono text-2xl font-extrabold leading-none text-foreground truncate"
-                  style="margin-top: 8px; font-size: 1.75rem; font-weight: 800; line-height: 1;">
-                  <span id="metricTokensVal">0</span><span class="ml-1.5 text-xs font-semibold text-primary"
-                    style="margin-left: 6px; font-size: 0.8rem; font-weight: 600; color: #38bdf8;">tok</span>
+                <p class="font-mono text-[1.1rem] font-extrabold leading-none text-foreground truncate" style="font-size: 1.1rem; font-weight: 800; line-height: 1;">
+                  <span id="metricTokensVal">0</span><span class="ml-1.5 text-[0.65rem] font-semibold text-primary" style="margin-left: 6px; font-size: 0.65rem; font-weight: 600; color: #38bdf8;">tok</span>
                 </p>
               </div>
 
-              <!-- SVG Donut Chart Ring -->
-              <div class="relative flex items-center justify-center shrink-0"
-                style="position: relative; display: flex; align-items: center; justify-content: center; width: 56px; height: 56px; flex-shrink: 0;">
-                <svg width="56" height="56" viewBox="0 0 56 56"
-                  style="transform: rotate(-90deg); width: 56px; height: 56px;">
-                  <defs>
-                    <linearGradient id="donutGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stop-color="#38bdf8" />
-                      <stop offset="100%" stop-color="#0284c7" />
-                    </linearGradient>
-                  </defs>
-                  <!-- Background Circle Track -->
-                  <circle cx="28" cy="28" r="22" stroke="rgba(56, 189, 248, 0.15)" stroke-width="4.5" fill="none" />
-                  <!-- Animated Progress Circle Stroke -->
-                  <circle id="donutCircleRing" cx="28" cy="28" r="22" stroke="url(#donutGradient)" stroke-width="4.5"
-                    fill="none" stroke-linecap="round" stroke-dasharray="138.23" stroke-dashoffset="138.23"
-                    style="transition: stroke-dashoffset 0.6s cubic-bezier(0.16, 1, 0.3, 1);" />
-                </svg>
-                <!-- Center Percentage Text -->
-                <span id="donutCenterPct" class="absolute font-mono text-[0.65rem] font-extrabold text-sky-400"
-                  style="position: absolute; font-size: 0.65rem; font-weight: 800; color: #38bdf8;">0%</span>
+              <!-- API 2: Tavily Search -->
+              <div class="flex items-center justify-between" style="display: flex; justify-content: space-between; align-items: center;">
+                <p class="text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground flex items-center gap-1.5" style="font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #94a3b8;">
+                  API 2: Tavily
+                </p>
+                <p class="font-mono text-[1.1rem] font-extrabold leading-none text-foreground truncate" style="font-size: 1.1rem; font-weight: 800; line-height: 1;">
+                  <span id="metricTavilyVal">0</span><span class="ml-1.5 text-[0.65rem] font-semibold text-primary" style="margin-left: 6px; font-size: 0.65rem; font-weight: 600; color: #38bdf8;">req</span>
+                </p>
               </div>
             </div>
-            <p class="relative mt-3 text-xs text-muted-foreground" id="metricTokensSub"
-              style="position: relative; margin-top: 12px; font-size: 0.75rem; color: #94a3b8;">≈ across 0 published
-              posts • Click to toggle</p>
+            <p class="relative mt-3 text-[0.68rem] text-muted-foreground" id="metricTokensSub" style="position: relative; margin-top: 14px; font-size: 0.68rem; color: #94a3b8; text-align: center;">Total consumption across published posts</p>
           </div>
 
           <!-- Active Agents Card -->
@@ -1709,47 +1681,21 @@
       let cachedPostsCount = 0;
       const TOTAL_TOKEN_QUOTA = 500000; // 5 Lakh (500,000) Token Quota
 
-      function toggleTokenMetric() {
-        tokenMetricState = (tokenMetricState + 1) % 3;
-        renderTokenMetric();
-      }
+      function toggleTokenMetric() {}
 
       function renderTokenMetric() {
-        const titleEl = document.getElementById('metricTokensTitle');
-        const valEl = document.getElementById('metricTokensVal');
-        const subEl = document.getElementById('metricTokensSub');
-        const donutRing = document.getElementById('donutCircleRing');
-        const donutCenterPct = document.getElementById('donutCenterPct');
-        if (!titleEl || !valEl || !subEl) return;
+        const llmVal = document.getElementById('metricTokensVal');
+        const tavVal = document.getElementById('metricTavilyVal');
+        const sub = document.getElementById('metricTokensSub');
 
-        let pct = 0;
-
-        if (tokenMetricState === 0) {
-          titleEl.textContent = 'LLM Tokens consumed';
-          valEl.textContent = cachedTotalTok.toLocaleString('en-IN');
-          subEl.textContent = `≈ across ${cachedPostsCount} published posts • Click to toggle`;
-          pct = (cachedTotalTok / TOTAL_TOKEN_QUOTA) * 100;
-        } else if (tokenMetricState === 1) {
-          const remaining = Math.max(0, TOTAL_TOKEN_QUOTA - cachedTotalTok);
-          titleEl.textContent = 'LLM Tokens remaining';
-          valEl.textContent = remaining.toLocaleString('en-IN');
-          subEl.textContent = `Out of 5,00,000 (5 Lakh) LLM quota • Click for Tavily search tokens`;
-          pct = (remaining / TOTAL_TOKEN_QUOTA) * 100;
-        } else {
-          const tavilyCredits = cachedPostsCount;
-          const tavilyTokens = cachedPostsCount * 1000;
-          titleEl.textContent = 'Tavily Search Tokens';
-          valEl.textContent = tavilyTokens.toLocaleString('en-IN');
-          subEl.textContent = `${tavilyCredits} Tavily search credits used (1/cycle) • Click for LLM consumed`;
-          pct = (tavilyCredits / 500) * 100; // 500 Tavily search monthly quota
+        if (llmVal) {
+          llmVal.textContent = cachedTotalTok.toLocaleString('en-IN');
         }
-
-        if (donutRing && donutCenterPct) {
-          const clampedPct = Math.min(100, Math.max(0, pct));
-          const circumference = 138.23; // 2 * PI * 22
-          const offset = circumference * (1 - clampedPct / 100);
-          donutRing.style.strokeDashoffset = offset;
-          donutCenterPct.textContent = `${clampedPct.toFixed(0)}%`;
+        if (tavVal) {
+          tavVal.textContent = cachedPostsCount.toLocaleString('en-IN');
+        }
+        if (sub) {
+            sub.textContent = `Total consumption across ${cachedPostsCount} published posts`;
         }
       }
 
