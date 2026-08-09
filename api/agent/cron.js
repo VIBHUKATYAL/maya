@@ -138,7 +138,7 @@ module.exports = async (req, res) => {
           .select("text, rationale")
           .eq("agent_id", agent.id)
           .order("created_at", { ascending: false })
-          .limit(15);
+          .limit(3);
 
         const memoryContext =
           posts && posts.length > 0
