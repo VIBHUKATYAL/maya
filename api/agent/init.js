@@ -52,7 +52,21 @@ module.exports = async (req, res) => {
     if (agentError) throw agentError;
     const agentId = agentData.id || agentData.agentId;
 
-    // No longer instantly generating posts synchronously. The GitHub discovery CRON loop handles this cleanly.
+    // Immediately trigger a synchronous generation cycle for the new agent, blocking until complete.
+    // This restores the instantaneous first-post population requested by the UX.
+    try {
+      const proto = req.headers["x-forwarded-proto"] || "https";
+      const host = req.headers.host;
+      if (host) {
+        // Safeguard for offline / local-only tests
+        await fetch(
+          `${proto}://${host}/api/agent/cron?force=true&agentId=${agentId}`,
+        );
+        await fetch(`${proto}://${host}/api/agent/publisher`);
+      }
+    } catch (e) {
+      console.error("Initial discovery dispatch failed:", e.message);
+    }
 
     return res.status(200).json({ agentId });
   } catch (error) {
