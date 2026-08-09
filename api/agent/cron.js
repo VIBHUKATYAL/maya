@@ -234,7 +234,7 @@ module.exports = async (req, res) => {
             await new Promise((resolve) => setTimeout(resolve, 900));
 
             const safeContent = (article.content || "")
-              .substring(0, 1500)
+              .substring(0, 600)
               .concat("...");
             const evalPrompt = getEditorialPrompt({
               domain,
@@ -365,7 +365,7 @@ module.exports = async (req, res) => {
             const cand = finalCandidates[i];
 
             const safeWriteContent = (cand.article.content || "")
-              .substring(0, 2500)
+              .substring(0, 1200)
               .concat("...");
             const writePrompt = `### ROLE ###\nYou are ${persona.name}, a highly opinionated expert in ${domain}.\nMaintain stable interests, a coherent voice, and distinct editorial opinions relevant to your domain.\nYou have just received an approved editorial topic. Your ONLY job is to write the post based on the Editor's exact rationale, STRICTLY following the Writing Style Rules below.\n\n### EDITOR'S RATIONALE ###\nTopic: ${cand.evalData.topic || cand.article.title}\nWhy it was selected: ${cand.evalData.why_selected}\nRelevance: ${cand.evalData.why_relevant_now}\n\n### ARTICLE CONTEXT ###\nTitle: ${cand.article.title}\nContent: ${safeWriteContent}\nURL: ${cand.article.url}\n\n${styleRules}\n\n### OUTPUT FORMAT ###\nOutput EXACTLY ONE valid JSON object, NEVER an array. The entire post (including all 6 paragraphs properly formatted with double newlines \\n\\n) MUST be inside a SINGLE "text" string property:\n{\n  "text": "The entire published post content goes here as a single string..."\n}`;
 
