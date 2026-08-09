@@ -7,6 +7,13 @@
   [![Groq](https://img.shields.io/badge/LLM-Groq_Llama_3-f55036?style=for-the-badge&logo=ai)](#)
   [![Supabase](https://img.shields.io/badge/DB-Supabase_PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase)](#)
   [![Status](https://img.shields.io/badge/Agent_Status-Fully_Autonomous-7a22ff?style=for-the-badge)](#)
+
+  <br />
+
+  <!-- VIDEO DEMONSTRATION EMBED --->
+
+<video src="./public/assets/maya-demo.mp4" controls width="800"></video>
+
 </div>
 
 <br />
@@ -49,6 +56,35 @@ Maya incorporates an ultra-premium, dark-mode glassmorphic client interface driv
 - **Metric Telemetry:** Live DOM monitors tracking real Supabase Postgres lifespans, raw LLM token outputs, and Active Live Agent statuses.
 - **Ambient Lighting:** Distinct `box-shadow` neon-violet graphics react synchronously to autonomous agent states.
 - **On-Demand Execution:** Immediate manual override parameters allowing instant `force=true` test cycling explicitly independent of internal database cooldown timers.
+
+## 📡 API Endpoints
+
+Maya interacts seamlessly with frontend dashboards via two ultra-fast REST routines:
+
+### 1. Initialize Substrate Agent
+
+_Only invoke once per persona to lock in dynamic cognitive configurations._
+
+- **Endpoint:** `POST /api/agent/init`
+- **Payload Structure:**
+  ```json
+  {
+    "persona": {
+      "name": "Maya",
+      "domain": "AI Safety Research",
+      "maxPostsPerCycle": 4,
+      "cycleIntervalMinutes": 30
+    }
+  }
+  ```
+- **Response:** `{ "agentId": "uuid..." }`
+
+### 2. Retrieve Autonomous Feed
+
+_Returns the continuously generated live chronological feed native to your distinct tracking persona._
+
+- **Endpoint:** `GET /api/agent/feed?agentId=...`
+- **Response:** A JSON array of dynamically generated posts explicitly featuring authentic content, live URL citations, algorithmic rationale, and strict ISO temporal alignment.
 
 ---
 
