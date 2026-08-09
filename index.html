@@ -1951,8 +1951,11 @@
         btn.style.opacity = '0.5';
 
         try {
-          const res = await fetch(getApiUrl('/api/agent/cron'));
+          const res = await fetch(getApiUrl('/api/agent/cron?force=true'));
           const data = await res.json();
+          // Immediately flush the publisher queue so they show up!
+          await fetch(getApiUrl('/api/agent/publisher'));
+
           if (data.error) {
             showToast(data.error, 'error');
           } else {
@@ -1983,8 +1986,11 @@
         }
 
         try {
-          const res = await fetch(getApiUrl('/api/agent/cron'));
+          const res = await fetch(getApiUrl('/api/agent/cron?force=true'));
           const data = await res.json();
+          // Immediately flush the publisher queue so they show up instantly!
+          await fetch(getApiUrl('/api/agent/publisher'));
+
           if (data.error) {
             showToast(data.error, 'error');
           } else {

@@ -49,21 +49,25 @@ module.exports = async (req, res) => {
         const maxPosts = persona.maxPostsPerCycle || 4;
         const intervalMins = persona.cycleIntervalMinutes || 30;
 
-        // Check if agent is due for a new discovery cycle
-        const lastIntervalDate = new Date(Date.now() - intervalMins * 60000);
-        const { data: recentLogs } = await supabase
-          .from("CycleLogs")
-          .select("created_at")
-          .eq("agent_id", agent.id)
-          .gte("created_at", lastIntervalDate.toISOString())
-          .order("created_at", { ascending: false })
-          .limit(1);
+        const forceRun = req.query.force === "true";
 
-        if (recentLogs && recentLogs.length > 0) {
-          debugLogs.push(
-            `Skipping agent ${agent.id} – cycle interval (${intervalMins}m) has not passed yet.`,
-          );
-          continue;
+        // Check if agent is due for a new discovery cycle
+        if (!forceRun) {
+          const lastIntervalDate = new Date(Date.now() - intervalMins * 60000);
+          const { data: recentLogs } = await supabase
+            .from("CycleLogs")
+            .select("created_at")
+            .eq("agent_id", agent.id)
+            .gte("created_at", lastIntervalDate.toISOString())
+            .order("created_at", { ascending: false })
+            .limit(1);
+
+          if (recentLogs && recentLogs.length > 0) {
+            debugLogs.push(
+              `Skipping agent ${agent.id} – cycle interval (${intervalMins}m) has not passed yet.`,
+            );
+            continue;
+          }
         }
 
         debugLogs.push(`Starting Discovery Cycle for agent ${agent.id}`);

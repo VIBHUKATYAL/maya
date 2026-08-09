@@ -29,7 +29,7 @@ module.exports = async (req, res) => {
       .from("Posts")
       .select("*")
       .eq("agent_id", agentId)
-      .eq("status", "PUBLISHED")
+      .in("status", ["PUBLISHED", "REJECTED"])
       .order("created_at", { ascending: false });
 
     if (error && error.code === "42703") {
@@ -37,7 +37,7 @@ module.exports = async (req, res) => {
         .from("Posts")
         .select("*")
         .eq("agentId", agentId)
-        .eq("status", "PUBLISHED")
+        .in("status", ["PUBLISHED", "REJECTED"])
         .order("created_at", { ascending: false });
       data = fallback.data;
       error = fallback.error;
