@@ -8,10 +8,10 @@ jobs:
   ping-cron:
     runs-on: ubuntu-latest
     steps:
-      - name: Flush Scheduling Queue (Lightweight Publisher)
-        run: |
-          curl -X GET "https://${{ secrets.VERCEL_DOMAIN }}/api/agent/publisher"
-
       - name: Trigger Master Discovery Engine
         run: |
           curl -X GET "https://${{ secrets.VERCEL_DOMAIN }}/api/agent/cron"
+
+      - name: Flush Scheduling Queue (Lightweight Publisher)
+        run: |
+          curl -X GET "https://${{ secrets.VERCEL_DOMAIN }}/api/agent/publisher"

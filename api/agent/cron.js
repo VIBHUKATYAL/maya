@@ -26,6 +26,17 @@ module.exports = async (req, res) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    // Automatically flush due scheduled queue items on every cron ping
+    try {
+      await supabase
+        .from("Posts")
+        .update({ status: "PUBLISHED" })
+        .eq("status", "SCHEDULED")
+        .lte("scheduled_for", new Date().toISOString());
+    } catch (err) {
+      console.error("Failed to flush scheduled queue", err);
+    }
+
     let queryObj = supabase.from("Agents").select("*");
     if (req.query && req.query.agentId) {
       queryObj = queryObj.eq("id", req.query.agentId);
@@ -39,7 +50,21 @@ module.exports = async (req, res) => {
     if (!agents || agents.length === 0)
       return res.status(200).json({ status: "No active agents", debugLogs });
 
+    const executionStart = Date.now();
+    const VERCEL_SAFE_TIMEOUT = 15000; // 15 seconds! (If an agent takes 40s to run, we DO NOT risk starting another if we're past 15s)
+
     for (const agent of agents) {
+      // Prevent Vercel hobby plan 60s timeout by gracefully yielding batches
+      if (
+        !req.query.agentId &&
+        Date.now() - executionStart > VERCEL_SAFE_TIMEOUT
+      ) {
+        debugLogs.push(
+          "Approaching Vercel execution limits (45s). Halting batch processor gracefully. Remaining agents queued for next interval.",
+        );
+        break;
+      }
+
       let cycleStarted = new Date();
       let cycleStatus = "SUCCESS";
       let postsScheduled = 0;
@@ -61,6 +86,7 @@ module.exports = async (req, res) => {
             .from("CycleLogs")
             .select("created_at")
             .eq("agent_id", agent.id)
+            .eq("status", "SUCCESS")
             .gte("created_at", lastIntervalDate.toISOString())
             .order("created_at", { ascending: false })
             .limit(1);
@@ -236,7 +262,9 @@ module.exports = async (req, res) => {
                   status: "REJECTED",
                 },
               ]);
-              continue;
+              cycleStatus = "FAILED";
+              cycleError = "API Rate Limit Exhaustion during Evaluation";
+              break;
             }
 
             let rawEval = evalResp.choices[0].message.content.trim();
@@ -362,7 +390,9 @@ module.exports = async (req, res) => {
                   status: "REJECTED",
                 },
               ]);
-              continue;
+              cycleStatus = "FAILED";
+              cycleError = "API Rate Limit Exhaustion during Generation";
+              break;
             }
 
             let rawWrite = writeResp.choices[0].message.content.trim();
