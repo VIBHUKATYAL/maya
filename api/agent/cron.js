@@ -74,7 +74,7 @@ module.exports = async (req, res) => {
         const persona = agent.persona || {};
         if (persona.isActive === false) continue; // SKIP PAUSED AGENTS
 
-        const maxPosts = Math.min(persona.maxPostsPerCycle || 6, 6);
+        const maxPosts = Math.min(persona.maxPostsPerCycle || 4, 4);
         const intervalMins = persona.cycleIntervalMinutes || 30;
 
         const forceRun = req.query.force === "true";
@@ -176,7 +176,7 @@ module.exports = async (req, res) => {
           const searchResponse = await tvly.search(query, {
             searchDepth: "basic",
             topic: "news",
-            maxResults: 6,
+            maxResults: 4,
           });
 
           if (!searchResponse || !searchResponse.results) continue;
@@ -223,8 +223,8 @@ module.exports = async (req, res) => {
               continue; // HARD SKIP
             }
 
-            if (groqEvals >= 10) {
-              break; // Throttle to prevent Vercel Timeout
+            if (groqEvals >= 4) {
+              break; // Throttle to prevent Webhook 30s Timeout & TPM Exhausion
             }
             groqEvals++;
 
