@@ -45,13 +45,20 @@ module.exports = async (req, res) => {
 
     if (error) throw error;
 
-    const posts = (data || []).map((post) => ({
-      id: post.id || undefined,
-      createdAt: post.created_at || post.createdAt || undefined,
-      text: post.text || "",
-      rationale: post.rationale || "",
-      sources: post.sources || [],
-    }));
+    const posts = (data || []).map((post) => {
+      const bestDateInput =
+        post.scheduled_for || post.created_at || post.createdAt;
+      const utcDateStr = bestDateInput
+        ? new Date(bestDateInput).toISOString()
+        : new Date().toISOString();
+      return {
+        id: post.id || undefined,
+        createdAt: utcDateStr,
+        text: post.text || "",
+        rationale: post.rationale || "",
+        sources: post.sources || [],
+      };
+    });
 
     return res.status(200).json({ posts });
   } catch (error) {
