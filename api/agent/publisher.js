@@ -52,6 +52,7 @@ module.exports = async (req, res) => {
           payload.writePrompt,
           genKeys,
           "llama-3.1-8b-instant",
+          false,
         );
 
         let rawWrite = writeResp.choices[0].message.content.trim();

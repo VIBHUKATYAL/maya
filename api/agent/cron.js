@@ -250,6 +250,7 @@ module.exports = async (req, res) => {
                 evalPrompt,
                 [groqKeys[0]],
                 "llama-3.1-8b-instant",
+                true,
               );
             } catch (err) {
               debugLogs.push(`API Exhaustion during Eval: ${err.message}`);
@@ -367,7 +368,7 @@ module.exports = async (req, res) => {
             const safeWriteContent = (cand.article.content || "")
               .substring(0, 1200)
               .concat("...");
-            const writePrompt = `### ROLE ###\nYou are ${persona.name}, a highly opinionated expert in ${domain}.\nMaintain stable interests, a coherent voice, and distinct editorial opinions relevant to your domain.\nYou have just received an approved editorial topic. Your ONLY job is to write the post based on the Editor's exact rationale, STRICTLY following the Writing Style Rules below.\n\n### EDITOR'S RATIONALE ###\nTopic: ${cand.evalData.topic || cand.article.title}\nWhy it was selected: ${cand.evalData.why_selected}\nRelevance: ${cand.evalData.why_relevant_now}\n\n### ARTICLE CONTEXT ###\nTitle: ${cand.article.title}\nContent: ${safeWriteContent}\nURL: ${cand.article.url}\n\n${styleRules}\n\n### OUTPUT FORMAT ###\nOutput EXACTLY ONE valid JSON object, NEVER an array. The entire post (including all 6 paragraphs properly formatted with double newlines \\n\\n) MUST be inside a SINGLE "text" string property:\n{\n  "text": "The entire published post content goes here as a single string..."\n}`;
+            const writePrompt = `### ROLE ###\nYou are ${persona.name}, a highly opinionated expert in ${domain}.\nMaintain stable interests, a coherent voice, and distinct editorial opinions relevant to your domain.\nYou have just received an approved editorial topic. Your ONLY job is to write the post based on the Editor's exact rationale, STRICTLY following the Writing Style Rules below.\n\n### EDITOR'S RATIONALE ###\nTopic: ${cand.evalData.topic || cand.article.title}\nWhy it was selected: ${cand.evalData.why_selected}\nRelevance: ${cand.evalData.why_relevant_now}\n\n### ARTICLE CONTEXT ###\nTitle: ${cand.article.title}\nContent: ${safeWriteContent}\nURL: ${cand.article.url}\n\n${styleRules}\n\n### OUTPUT FORMAT ###\nDO NOT output JSON or any brackets. Write exclusively pure Markdown plain text representing the entire final article dynamically structured into strictly 6 paragraphs properly formatted with double newlines. Output ONLY the article text.`;
 
             const generatorPayload = JSON.stringify({
               writePrompt,
