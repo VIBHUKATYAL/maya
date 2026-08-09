@@ -183,7 +183,7 @@ module.exports = async (req, res) => {
                     1,
                     Math.min(articleKeywords.size, postKeywords.size),
                   );
-                if (similarity > 0.35) {
+                if (similarity > 0.65) {
                   isExactDuplicate = true;
                   break;
                 }
