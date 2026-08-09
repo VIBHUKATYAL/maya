@@ -206,6 +206,27 @@
       z-index: 20;
     }
 
+    .btn-live-hover:hover {
+      box-shadow: 0 0 20px rgba(52, 211, 153, 0.65) !important;
+      border-color: rgba(52, 211, 153, 0.9) !important;
+      transform: scale(1.05) !important;
+      z-index: 20;
+    }
+
+    .btn-refresh-hover:hover {
+      box-shadow: 0 0 20px rgba(167, 139, 250, 0.65) !important;
+      border-color: rgba(167, 139, 250, 0.9) !important;
+      transform: scale(1.05) !important;
+      z-index: 20;
+    }
+
+    .btn-run-cycle-hover:hover {
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.65) !important;
+      border-color: rgba(56, 189, 248, 0.9) !important;
+      transform: scale(1.05) !important;
+      z-index: 20;
+    }
+
     .grid-lines {
       background-image:
         linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
@@ -427,7 +448,7 @@
         <div class="ml-auto flex items-center gap-2.5"
           style="margin-left: auto; display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
           <button onclick="openLiveAgentsModal()" id="liveAgentsBtn"
-            class="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1.5 font-mono text-xs text-emerald-400 transition-all hover:border-emerald-500/60 hover:bg-emerald-500/20 active:scale-95 cursor-pointer shadow-[0_0_12px_rgba(52,211,153,0.15)]"
+            class="btn-live-hover inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1.5 font-mono text-xs text-emerald-400 transition-all hover:border-emerald-500/60 hover:bg-emerald-500/20 active:scale-95 cursor-pointer shadow-[0_0_12px_rgba(52,211,153,0.15)]"
             style="display: inline-flex; align-items: center; gap: 8px; border-radius: 9999px; border: 1px solid rgba(52, 211, 153, 0.3); background: rgba(52, 211, 153, 0.1); padding: 6px 14px; font-size: 0.75rem; color: #34d399; cursor: pointer;"
             title="Click to view all live active agents">
             <span class="live-dot size-2 rounded-full bg-emerald-400"
@@ -436,7 +457,7 @@
           </button>
 
           <button onclick="refreshAll()" id="refreshBtn"
-            class="inline-flex items-center gap-1.5 rounded-full border border-violet-500/30 bg-violet-500/10 px-3.5 py-1.5 font-mono text-xs text-violet-400 transition-all hover:border-violet-500/60 hover:bg-violet-500/20 active:scale-95 cursor-pointer shadow-[0_0_12px_rgba(167,139,250,0.15)]"
+            class="btn-refresh-hover inline-flex items-center gap-1.5 rounded-full border border-violet-500/30 bg-violet-500/10 px-3.5 py-1.5 font-mono text-xs text-violet-400 transition-all hover:border-violet-500/60 hover:bg-violet-500/20 active:scale-95 cursor-pointer shadow-[0_0_12px_rgba(167,139,250,0.15)]"
             style="display: inline-flex; align-items: center; gap: 8px; border-radius: 9999px; border: 1px solid rgba(167, 139, 250, 0.35); background: rgba(167, 139, 250, 0.12); padding: 6px 14px; font-size: 0.75rem; color: #c084fc; cursor: pointer; font-weight: 700;"
             title="Refresh active telemetry and feed">
             <svg id="refreshIcon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
@@ -451,7 +472,7 @@
           </button>
 
           <button onclick="forceCron()" id="runCycleBtn"
-            class="inline-flex items-center gap-1.5 rounded-full border border-sky-500/30 bg-sky-500/10 px-3.5 py-1.5 font-mono text-xs text-sky-400 transition-all hover:border-sky-500/60 hover:bg-sky-500/20 active:scale-95 cursor-pointer shadow-[0_0_12px_rgba(56,189,248,0.15)]"
+            class="btn-run-cycle-hover inline-flex items-center gap-1.5 rounded-full border border-sky-500/30 bg-sky-500/10 px-3.5 py-1.5 font-mono text-xs text-sky-400 transition-all hover:border-sky-500/60 hover:bg-sky-500/20 active:scale-95 cursor-pointer shadow-[0_0_12px_rgba(56,189,248,0.15)]"
             style="display: inline-flex; align-items: center; gap: 8px; border-radius: 9999px; border: 1px solid rgba(56, 189, 248, 0.35); background: rgba(56, 189, 248, 0.12); padding: 6px 14px; font-size: 0.75rem; color: #38bdf8; cursor: pointer; font-weight: 700;"
             title="Run autonomous research cycle">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
@@ -816,12 +837,7 @@
                 <p class="text-lg font-extrabold text-rose-400" id="feedRejectionsCount"
                   style="font-size: 1.125rem; font-weight: 800; color: #f87171; cursor: pointer;">0</p>
               </div>
-              <div>
-                <p class="text-[0.7rem] uppercase tracking-wider text-muted-foreground"
-                  style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;">Avg tokens</p>
-                <p class="text-lg text-violet font-extrabold" id="feedAvgTokens"
-                  style="font-size: 1.125rem; font-weight: 800; color: #c084fc;">0</p>
-              </div>
+
             </div>
           </div>
 
