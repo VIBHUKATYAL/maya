@@ -74,7 +74,7 @@ module.exports = async (req, res) => {
         const persona = agent.persona || {};
         if (persona.isActive === false) continue; // SKIP PAUSED AGENTS
 
-        const maxPosts = persona.maxPostsPerCycle || 4;
+        const maxPosts = Math.min(persona.maxPostsPerCycle || 6, 6);
         const intervalMins = persona.cycleIntervalMinutes || 30;
 
         const forceRun = req.query.force === "true";
@@ -176,7 +176,7 @@ module.exports = async (req, res) => {
           const searchResponse = await tvly.search(query, {
             searchDepth: "basic",
             topic: "news",
-            maxResults: 10,
+            maxResults: 6,
           });
 
           if (!searchResponse || !searchResponse.results) continue;
@@ -298,10 +298,10 @@ module.exports = async (req, res) => {
               } else if (!evalData.why_relevant_now) {
                 finalDecision = "REJECT";
                 validationRejection = "Missing publishing rationale criteria.";
-              } else if (evalData.score && evalData.score < 70) {
+              } else if (evalData.score && evalData.score < 40) {
                 finalDecision = "REJECT";
                 validationRejection =
-                  "Topic scored too low logically to securely publish.";
+                  "Topic scored too low logically to securely publish (Score < 40).";
               }
             }
 
