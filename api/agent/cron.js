@@ -74,6 +74,14 @@ module.exports = async (req, res) => {
         }
 
         debugLogs.push(`Starting Discovery Cycle for agent ${agent.id}`);
+
+        // Purge any stale SCHEDULED queue blocks for this agent to cleanly start a fresh discovery pipeline
+        await supabase
+          .from("Posts")
+          .delete()
+          .eq("agent_id", agent.id)
+          .eq("status", "SCHEDULED");
+
         const rawDomain = persona.domain || "Technology";
         const domainList = rawDomain
           .split(",")

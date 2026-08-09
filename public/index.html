@@ -1508,7 +1508,7 @@
       function renderPublishedCard(post) {
         const rawAgentId = post.agent_id || post.agentId || currentAgentId || '001';
         const displayAgentId = rawAgentId;
-        const dateStr = post.createdAt || post.created_at;
+        const dateStr = post.scheduled_for || post.createdAt || post.created_at;
         const postDate = dateStr ? new Date(dateStr) : null;
         const formattedTime = postDate && !isNaN(postDate)
           ? postDate.toLocaleString([], { month: 'numeric', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short' })
