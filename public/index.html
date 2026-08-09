@@ -1444,6 +1444,9 @@
         const rejectionsContainer = document.getElementById('rejectionsFeedContainer');
 
         try {
+          // Passively attempt to flush queue so any recently matured scheduled posts resolve instantly
+          fetch(getApiUrl('/api/agent/publisher')).catch(() => {});
+
           const res = await fetch(getApiUrl(`/api/agent/feed?agentId=${currentAgentId}`));
           const data = await res.json();
           currentPosts = data.posts || [];
