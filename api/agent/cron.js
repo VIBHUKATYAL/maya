@@ -248,7 +248,7 @@ module.exports = async (req, res) => {
             try {
               evalResp = await fetchWithGroqFallback(
                 evalPrompt,
-                groqKeys,
+                [groqKeys[0]],
                 "llama-3.1-8b-instant",
               );
             } catch (err) {
@@ -369,59 +369,12 @@ module.exports = async (req, res) => {
               .concat("...");
             const writePrompt = `### ROLE ###\nYou are ${persona.name}, a highly opinionated expert in ${domain}.\nMaintain stable interests, a coherent voice, and distinct editorial opinions relevant to your domain.\nYou have just received an approved editorial topic. Your ONLY job is to write the post based on the Editor's exact rationale, STRICTLY following the Writing Style Rules below.\n\n### EDITOR'S RATIONALE ###\nTopic: ${cand.evalData.topic || cand.article.title}\nWhy it was selected: ${cand.evalData.why_selected}\nRelevance: ${cand.evalData.why_relevant_now}\n\n### ARTICLE CONTEXT ###\nTitle: ${cand.article.title}\nContent: ${safeWriteContent}\nURL: ${cand.article.url}\n\n${styleRules}\n\n### OUTPUT FORMAT ###\nOutput EXACTLY ONE valid JSON object, NEVER an array. The entire post (including all 6 paragraphs properly formatted with double newlines \\n\\n) MUST be inside a SINGLE "text" string property:\n{\n  "text": "The entire published post content goes here as a single string..."\n}`;
 
-            await new Promise((resolve) => setTimeout(resolve, 900));
-            let writeResp;
-            try {
-              writeResp = await fetchWithGroqFallback(
-                writePrompt,
-                groqKeys,
-                "llama-3.1-8b-instant",
-              );
-            } catch (err) {
-              debugLogs.push(
-                `API Exhaustion during Generation: ${err.message}`,
-              );
-              await supabase.from("Posts").insert([
-                {
-                  agent_id: agent.id,
-                  text: `[REJECTED]\n**Topic:** ${cand.evalData.topic || cand.article.title}\n\n**Why Rejected:** ⚠️ Evaluation Passed, BUT generation completely crashed due to Groq API Rate Limit Exhaustion! The LLM bucket hit max capacity natively upon generation.`,
-                  rationale: "API Rate Limit Exhaustion",
-                  sources: [cand.article.url],
-                  status: "REJECTED",
-                },
-              ]);
-              cycleStatus = "FAILED";
-              cycleError = "API Rate Limit Exhaustion during Generation";
-              break;
-            }
+            const generatorPayload = JSON.stringify({
+              writePrompt,
+              why_selected: cand.evalData.why_selected,
+              why_relevant_now: cand.evalData.why_relevant_now,
+            });
 
-            let rawWrite = writeResp.choices[0].message.content.trim();
-            if (rawWrite.startsWith("```json"))
-              rawWrite = rawWrite.replace(/```json/g, "");
-            if (rawWrite.startsWith("```"))
-              rawWrite = rawWrite.replace(/```/g, "");
-            if (rawWrite.endsWith("```")) rawWrite = rawWrite.slice(0, -3);
-
-            let generatedText = cand.article.title;
-            try {
-              const parsedWrite = JSON.parse(rawWrite.trim());
-              if (Array.isArray(parsedWrite)) {
-                generatedText = parsedWrite
-                  .map((item) => item.text || item.post || item.content || "")
-                  .filter(Boolean)
-                  .join("\n\n");
-              } else {
-                generatedText =
-                  parsedWrite.text ||
-                  parsedWrite.post ||
-                  parsedWrite.content ||
-                  rawWrite;
-              }
-            } catch (e) {
-              generatedText = rawWrite;
-            }
-
-            const rationaleOutput = `**Why Selected:** ${cand.evalData.why_selected}\n**Relevance:** ${cand.evalData.why_relevant_now}`;
             const scheduledDate = new Date(
               now + timeSpacingMs * i,
             ).toISOString();
@@ -429,8 +382,8 @@ module.exports = async (req, res) => {
             const { error: insertError } = await supabase.from("Posts").insert([
               {
                 agent_id: agent.id,
-                text: generatedText || "No text available.",
-                rationale: rationaleOutput,
+                text: "[PENDING_GENERATION]",
+                rationale: generatorPayload,
                 sources: [cand.article.url],
                 status: "SCHEDULED",
                 scheduled_for: scheduledDate,
@@ -445,8 +398,8 @@ module.exports = async (req, res) => {
               await supabase.from("Posts").insert([
                 {
                   agentId: agent.id,
-                  text: generatedText || "No text available.",
-                  rationale: rationaleOutput,
+                  text: "[PENDING_GENERATION]",
+                  rationale: generatorPayload,
                   sources: [cand.article.url],
                   status: "SCHEDULED",
                   scheduled_for: scheduledDate,
