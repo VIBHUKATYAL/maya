@@ -150,7 +150,7 @@ module.exports = async (req, res) => {
           const searchResponse = await tvly.search(query, {
             searchDepth: "basic",
             topic: "news",
-            maxResults: 6,
+            maxResults: 10,
           });
 
           if (!searchResponse || !searchResponse.results) continue;
@@ -197,7 +197,7 @@ module.exports = async (req, res) => {
               continue; // HARD SKIP
             }
 
-            if (groqEvals >= 6) {
+            if (groqEvals >= 10) {
               break; // Throttle to prevent Vercel Timeout
             }
             groqEvals++;
@@ -220,7 +220,11 @@ module.exports = async (req, res) => {
 
             let evalResp;
             try {
-              evalResp = await fetchWithGroqFallback(evalPrompt, groqKeys);
+              evalResp = await fetchWithGroqFallback(
+                evalPrompt,
+                groqKeys,
+                "llama-3.1-8b-instant",
+              );
             } catch (err) {
               debugLogs.push(`API Exhaustion during Eval: ${err.message}`);
               await supabase.from("Posts").insert([
@@ -335,12 +339,16 @@ module.exports = async (req, res) => {
             const safeWriteContent = (cand.article.content || "")
               .substring(0, 2500)
               .concat("...");
-            const writePrompt = `### ROLE ###\nYou are ${persona.name}, a highly opinionated expert in ${domain}.\nMaintain stable interests, a coherent voice, and distinct editorial opinions relevant to your domain.\nYou have just received an approved editorial topic. Your ONLY job is to write the post based on the Editor's exact rationale, STRICTLY following the Writing Style Rules below.\n\n### EDITOR'S RATIONALE ###\nTopic: ${cand.evalData.topic || cand.article.title}\nWhy it was selected: ${cand.evalData.why_selected}\nRelevance: ${cand.evalData.why_relevant_now}\n\n### ARTICLE CONTEXT ###\nTitle: ${cand.article.title}\nContent: ${safeWriteContent}\nURL: ${cand.article.url}\n\n${styleRules}\n\n### OUTPUT FORMAT ###\nOutput ONLY valid JSON:\n{\n  "text": "The final structured markdown text following the provided writing style perfectly, without any forced emojis."\n}`;
+            const writePrompt = `### ROLE ###\nYou are ${persona.name}, a highly opinionated expert in ${domain}.\nMaintain stable interests, a coherent voice, and distinct editorial opinions relevant to your domain.\nYou have just received an approved editorial topic. Your ONLY job is to write the post based on the Editor's exact rationale, STRICTLY following the Writing Style Rules below.\n\n### EDITOR'S RATIONALE ###\nTopic: ${cand.evalData.topic || cand.article.title}\nWhy it was selected: ${cand.evalData.why_selected}\nRelevance: ${cand.evalData.why_relevant_now}\n\n### ARTICLE CONTEXT ###\nTitle: ${cand.article.title}\nContent: ${safeWriteContent}\nURL: ${cand.article.url}\n\n${styleRules}\n\n### OUTPUT FORMAT ###\nOutput EXACTLY ONE valid JSON object, NEVER an array. The entire post (including all 6 paragraphs properly formatted with double newlines \\n\\n) MUST be inside a SINGLE "text" string property:\n{\n  "text": "The entire published post content goes here as a single string..."\n}`;
 
             await new Promise((resolve) => setTimeout(resolve, 900));
             let writeResp;
             try {
-              writeResp = await fetchWithGroqFallback(writePrompt, groqKeys);
+              writeResp = await fetchWithGroqFallback(
+                writePrompt,
+                groqKeys,
+                "llama-3.3-70b-versatile",
+              );
             } catch (err) {
               debugLogs.push(
                 `API Exhaustion during Generation: ${err.message}`,
@@ -367,11 +375,18 @@ module.exports = async (req, res) => {
             let generatedText = cand.article.title;
             try {
               const parsedWrite = JSON.parse(rawWrite.trim());
-              generatedText =
-                parsedWrite.text ||
-                parsedWrite.post ||
-                parsedWrite.content ||
-                rawWrite;
+              if (Array.isArray(parsedWrite)) {
+                generatedText = parsedWrite
+                  .map((item) => item.text || item.post || item.content || "")
+                  .filter(Boolean)
+                  .join("\n\n");
+              } else {
+                generatedText =
+                  parsedWrite.text ||
+                  parsedWrite.post ||
+                  parsedWrite.content ||
+                  rawWrite;
+              }
             } catch (e) {
               generatedText = rawWrite;
             }
