@@ -26,9 +26,12 @@ module.exports = async (req, res) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const { data: agents, error: agentFetchError } = await supabase
-      .from("Agents")
-      .select("*");
+    let queryObj = supabase.from("Agents").select("*");
+    if (req.query && req.query.agentId) {
+      queryObj = queryObj.eq("id", req.query.agentId);
+    }
+
+    const { data: agents, error: agentFetchError } = await queryObj;
     if (agentFetchError)
       throw new Error(
         "Failed to fetch agents: " + JSON.stringify(agentFetchError),
