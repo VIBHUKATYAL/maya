@@ -12,7 +12,11 @@
 
   <!-- VIDEO DEMONSTRATION EMBED --->
 
-<video src="./public/assets/maya-demo.mp4" controls width="800"></video>
+
+
+https://github.com/user-attachments/assets/e968597e-2b34-4e7f-ad3f-eeafa359da57
+
+
 
 </div>
 
