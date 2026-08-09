@@ -218,7 +218,22 @@ module.exports = async (req, res) => {
               memoryContext,
             });
 
-            const evalResp = await fetchWithGroqFallback(evalPrompt, groqKeys);
+            let evalResp;
+            try {
+              evalResp = await fetchWithGroqFallback(evalPrompt, groqKeys);
+            } catch (err) {
+              debugLogs.push(`API Exhaustion during Eval: ${err.message}`);
+              await supabase.from("Posts").insert([
+                {
+                  agent_id: agent.id,
+                  text: `[REJECTED]\n**Topic:** ${article.title}\n\n**Why Rejected:** ⚠️ Groq API Rate Limit Completely Exhausted! The LLM engine failed to evaluate this candidate natively because your token buckets are empty. Switch to a smaller model or add more keys.`,
+                  rationale: "API Rate Limit Exhaustion",
+                  sources: [article.url],
+                  status: "REJECTED",
+                },
+              ]);
+              continue;
+            }
 
             let rawEval = evalResp.choices[0].message.content.trim();
             if (rawEval.startsWith("```json"))
@@ -323,10 +338,24 @@ module.exports = async (req, res) => {
             const writePrompt = `### ROLE ###\nYou are ${persona.name}, a highly opinionated expert in ${domain}.\nMaintain stable interests, a coherent voice, and distinct editorial opinions relevant to your domain.\nYou have just received an approved editorial topic. Your ONLY job is to write the post based on the Editor's exact rationale, STRICTLY following the Writing Style Rules below.\n\n### EDITOR'S RATIONALE ###\nTopic: ${cand.evalData.topic || cand.article.title}\nWhy it was selected: ${cand.evalData.why_selected}\nRelevance: ${cand.evalData.why_relevant_now}\n\n### ARTICLE CONTEXT ###\nTitle: ${cand.article.title}\nContent: ${safeWriteContent}\nURL: ${cand.article.url}\n\n${styleRules}\n\n### OUTPUT FORMAT ###\nOutput ONLY valid JSON:\n{\n  "text": "The final structured markdown text following the provided writing style perfectly, without any forced emojis."\n}`;
 
             await new Promise((resolve) => setTimeout(resolve, 900));
-            const writeResp = await fetchWithGroqFallback(
-              writePrompt,
-              groqKeys,
-            );
+            let writeResp;
+            try {
+              writeResp = await fetchWithGroqFallback(writePrompt, groqKeys);
+            } catch (err) {
+              debugLogs.push(
+                `API Exhaustion during Generation: ${err.message}`,
+              );
+              await supabase.from("Posts").insert([
+                {
+                  agent_id: agent.id,
+                  text: `[REJECTED]\n**Topic:** ${cand.evalData.topic || cand.article.title}\n\n**Why Rejected:** ⚠️ Evaluation Passed, BUT generation completely crashed due to Groq API Rate Limit Exhaustion! The LLM bucket hit max capacity natively upon generation.`,
+                  rationale: "API Rate Limit Exhaustion",
+                  sources: [cand.article.url],
+                  status: "REJECTED",
+                },
+              ]);
+              continue;
+            }
 
             let rawWrite = writeResp.choices[0].message.content.trim();
             if (rawWrite.startsWith("```json"))
