@@ -46,7 +46,10 @@ module.exports = async (req, res) => {
         const groqKeys = (process.env.GROQ_API_KEY || groqFallback)
           .split(",")
           .map((k) => k.trim());
-        const genKeys = [groqKeys[groqKeys.length - 1] || groqKeys[0]]; // Exclusively utilize the very last key for generators to natively slice api metrics
+
+        // Dynamically partition the second half of key payloads strictly for the async Generators
+        let genKeys = groqKeys.slice(Math.ceil(groqKeys.length / 2));
+        if (genKeys.length === 0) genKeys = groqKeys.slice(0, 1);
 
         const writeResp = await fetchWithGroqFallback(
           payload.writePrompt,

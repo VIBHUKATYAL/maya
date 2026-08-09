@@ -245,10 +245,14 @@ module.exports = async (req, res) => {
             });
 
             let evalResp;
+            const evalKeys = groqKeys.slice(
+              0,
+              Math.max(1, Math.ceil(groqKeys.length / 2)),
+            );
             try {
               evalResp = await fetchWithGroqFallback(
                 evalPrompt,
-                [groqKeys[0]],
+                evalKeys,
                 "llama-3.1-8b-instant",
                 true,
               );
