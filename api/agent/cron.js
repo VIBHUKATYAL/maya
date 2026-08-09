@@ -37,10 +37,36 @@ module.exports = async (req, res) => {
       return res.status(200).json({ status: "No active agents", debugLogs });
 
     for (const agent of agents) {
+      let cycleStarted = new Date();
+      let cycleStatus = "SUCCESS";
+      let postsScheduled = 0;
+      let cycleError = null;
+
       try {
         const persona = agent.persona || {};
         if (persona.isActive === false) continue; // SKIP PAUSED AGENTS
-        debugLogs.push(`Starting agent ${agent.id}`);
+
+        const maxPosts = persona.maxPostsPerCycle || 4;
+        const intervalMins = persona.cycleIntervalMinutes || 30;
+
+        // Check if agent is due for a new discovery cycle
+        const lastIntervalDate = new Date(Date.now() - intervalMins * 60000);
+        const { data: recentLogs } = await supabase
+          .from("CycleLogs")
+          .select("created_at")
+          .eq("agent_id", agent.id)
+          .gte("created_at", lastIntervalDate.toISOString())
+          .order("created_at", { ascending: false })
+          .limit(1);
+
+        if (recentLogs && recentLogs.length > 0) {
+          debugLogs.push(
+            `Skipping agent ${agent.id} – cycle interval (${intervalMins}m) has not passed yet.`,
+          );
+          continue;
+        }
+
+        debugLogs.push(`Starting Discovery Cycle for agent ${agent.id}`);
         const rawDomain = persona.domain || "Technology";
         const domainList = rawDomain
           .split(",")
@@ -60,13 +86,10 @@ module.exports = async (req, res) => {
           `Adversarial attacks, safety frameworks, and security research in ${domain}`,
           `Behind the scenes engineering challenges and executive strategy in ${domain}`,
         ];
-        // Shuffle and pick 4 randomly for wider fallback pool
+        // Shuffle and pick multiple candidate branches
         const searchQueries = allQueries
           .sort(() => 0.5 - Math.random())
           .slice(0, 4);
-
-        let postPublished = false;
-        let groqEvals = 0;
 
         // Pull Memory to prevent repeating content!
         const { data: posts } = await supabase
@@ -74,7 +97,7 @@ module.exports = async (req, res) => {
           .select("text, rationale")
           .eq("agent_id", agent.id)
           .order("created_at", { ascending: false })
-          .limit(10);
+          .limit(15);
 
         const memoryContext =
           posts && posts.length > 0
@@ -84,7 +107,9 @@ module.exports = async (req, res) => {
                   const type = isRejected
                     ? "PREVIOUSLY REJECTED"
                     : "PREVIOUSLY PUBLISHED";
-                  const snippet = p.text.substring(0, 80).replace(/\\n/g, " ");
+                  const snippet = (typeof p.text === "string" ? p.text : "")
+                    .substring(0, 80)
+                    .replace(/\\n/g, " ");
                   return `[${type}] ${snippet} | Editor Note: ${p.rationale}`;
                 })
                 .join("\n")
@@ -98,27 +123,33 @@ module.exports = async (req, res) => {
         const getGroqKey = () =>
           groqKeys[Math.floor(Math.random() * groqKeys.length)];
 
-        for (const query of searchQueries) {
-          if (postPublished) break; // Break outer loop completely if we found a good post!
-          const tvly = tavily({ apiKey: getTvlyKey() });
+        let approvedCandidates = [];
+        let groqEvals = 0;
 
+        // DISCOVERY & EDITORIAL EVALUATION
+        for (const query of searchQueries) {
+          if (approvedCandidates.length >= maxPosts) break;
+
+          const tvly = tavily({ apiKey: getTvlyKey() });
           debugLogs.push(`Searching Tavily for: ${query}`);
           const searchResponse = await tvly.search(query, {
             searchDepth: "basic",
             topic: "news",
-            maxResults: 10,
+            maxResults: 6,
           });
 
           if (!searchResponse || !searchResponse.results) continue;
 
           for (const article of searchResponse.results) {
-            // PROGRAMMATIC DUPLICATE FILTERING (JACCARD ALGORITHM)
+            if (approvedCandidates.length >= maxPosts) break;
+
+            // JACCARD DUPLICATE ALGORITHM
             const getKeywords = (text) => {
               const words = (text || "")
                 .toLowerCase()
                 .replace(/[^a-z0-9\s]/g, "")
                 .split(/\s+/);
-              return new Set(words.filter((w) => w.length > 4)); // Only significant words
+              return new Set(words.filter((w) => w.length > 4));
             };
 
             const articleKeywords = getKeywords(article.title);
@@ -137,7 +168,6 @@ module.exports = async (req, res) => {
                     1,
                     Math.min(articleKeywords.size, postKeywords.size),
                   );
-                // Stricter string-based similarity filter: if 35% of the title overlaps entirely with any past post text, KILL it.
                 if (similarity > 0.35) {
                   isExactDuplicate = true;
                   break;
@@ -149,28 +179,22 @@ module.exports = async (req, res) => {
               debugLogs.push(
                 `Blocked Duplicate Algorithmically: ${article.title}`,
               );
-              continue; // HARD SKIP! Never hits the LLM prompt.
+              continue; // HARD SKIP
             }
 
-            if (groqEvals >= 3) {
-              debugLogs.push(
-                `Throttling execution early to prevent Vercel Timeout limit.`,
-              );
-              break; // Break the inner article evaluation loop!
+            if (groqEvals >= 6) {
+              break; // Throttle to prevent Vercel Timeout
             }
             groqEvals++;
 
             debugLogs.push(
               `Evaluating article sequentially via Groq: ${article.title}`,
             );
-
-            // THROTTLE TO PREVENT GROQ 429 RATE LIMITS (Max 30 requests/min free tier)
             await new Promise((resolve) => setTimeout(resolve, 900));
 
             const safeContent = (article.content || "")
               .substring(0, 1500)
               .concat("...");
-
             const evalPrompt = getEditorialPrompt({
               domain,
               articleTitle: article.title,
@@ -181,7 +205,6 @@ module.exports = async (req, res) => {
 
             const evalResp = await fetchWithGroqFallback(evalPrompt, groqKeys);
 
-            // Strip backticks if any
             let rawEval = evalResp.choices[0].message.content.trim();
             if (rawEval.startsWith("```json"))
               rawEval = rawEval.replace(/```json/g, "");
@@ -199,7 +222,6 @@ module.exports = async (req, res) => {
               };
             }
 
-            // SERVER-SIDE DETERMINISTIC VALIDATION
             let finalDecision = evalData.decision || "REJECT";
             let validationRejection = "";
 
@@ -221,7 +243,13 @@ module.exports = async (req, res) => {
               }
             }
 
-            if (finalDecision !== "PUBLISH") {
+            if (finalDecision === "PUBLISH") {
+              approvedCandidates.push({
+                article,
+                evalData,
+                score: evalData.score || 80,
+              });
+            } else {
               const combinedReason =
                 validationRejection ||
                 evalData.rejection_reason ||
@@ -236,6 +264,7 @@ module.exports = async (req, res) => {
                     text: parsedText,
                     rationale: combinedReason,
                     sources: [article.url],
+                    status: "REJECTED",
                   },
                 ]);
               if (insertError) {
@@ -245,26 +274,40 @@ module.exports = async (req, res) => {
                     text: parsedText,
                     rationale: combinedReason,
                     sources: [article.url],
+                    status: "REJECTED",
                   },
                 ]);
               }
-              continue; // Next article!
             }
+          }
+        }
 
-            // GENERATION PHASE!
-            const styleRules = getStylePrompt(
-              persona.style || persona.writingStyle || "Tech Storytelling",
-            );
+        // GENERATION & SCHEDULING PHASE
+        if (approvedCandidates.length > 0) {
+          // Sort by score ascending so the best is processed last? Or descending.
+          approvedCandidates.sort((a, b) => b.score - a.score);
+          const finalCandidates = approvedCandidates.slice(0, maxPosts);
 
-            const safeWriteContent = (article.content || "")
+          const styleRules = getStylePrompt(
+            persona.style || persona.writingStyle || "Tech Storytelling",
+          );
+
+          const now = Date.now();
+          // Distribute evenly across the interval minutes (e.g., if 4 posts across 30 mins -> post every 7.5 mins)
+          const timeSpacingMs =
+            finalCandidates.length > 1
+              ? (intervalMins * 60000) / finalCandidates.length
+              : 0;
+
+          for (let i = 0; i < finalCandidates.length; i++) {
+            const cand = finalCandidates[i];
+
+            const safeWriteContent = (cand.article.content || "")
               .substring(0, 2500)
               .concat("...");
+            const writePrompt = `### ROLE ###\nYou are ${persona.name}, a highly opinionated expert in ${domain}.\nMaintain stable interests, a coherent voice, and distinct editorial opinions relevant to your domain.\nYou have just received an approved editorial topic. Your ONLY job is to write the post based on the Editor's exact rationale, STRICTLY following the Writing Style Rules below.\n\n### EDITOR'S RATIONALE ###\nTopic: ${cand.evalData.topic || cand.article.title}\nWhy it was selected: ${cand.evalData.why_selected}\nRelevance: ${cand.evalData.why_relevant_now}\n\n### ARTICLE CONTEXT ###\nTitle: ${cand.article.title}\nContent: ${safeWriteContent}\nURL: ${cand.article.url}\n\n${styleRules}\n\n### OUTPUT FORMAT ###\nOutput ONLY valid JSON:\n{\n  "text": "The final structured markdown text following the provided writing style perfectly, without any forced emojis."\n}`;
 
-            const writePrompt = `### ROLE ###\nYou are ${persona.name}, a highly opinionated expert in ${domain}.\nMaintain stable interests, a coherent voice, and distinct editorial opinions relevant to your domain.\nYou have just received an approved editorial topic. Your ONLY job is to write the post based on the Editor's exact rationale, STRICTLY following the Writing Style Rules below.\n\n### EDITOR'S RATIONALE ###\nTopic: ${evalData.topic || article.title}\nWhy it was selected: ${evalData.why_selected}\nRelevance: ${evalData.why_relevant_now}\n\n### ARTICLE CONTEXT ###\nTitle: ${article.title}\nContent: ${safeWriteContent}\nURL: ${article.url}\n\n${styleRules}\n\n### OUTPUT FORMAT ###\nOutput ONLY valid JSON:\n{\n  "text": "The final structured markdown text following the provided writing style perfectly, without any forced emojis."\n}`;
-
-            // THROTTLE TO PREVENT GROQ 429 RATE LIMITS (Max 30 requests/min free tier)
             await new Promise((resolve) => setTimeout(resolve, 900));
-
             const writeResp = await fetchWithGroqFallback(
               writePrompt,
               groqKeys,
@@ -277,7 +320,7 @@ module.exports = async (req, res) => {
               rawWrite = rawWrite.replace(/```/g, "");
             if (rawWrite.endsWith("```")) rawWrite = rawWrite.slice(0, -3);
 
-            let generatedText = article.title; // fallback
+            let generatedText = cand.article.title;
             try {
               const parsedWrite = JSON.parse(rawWrite.trim());
               generatedText =
@@ -289,46 +332,67 @@ module.exports = async (req, res) => {
               generatedText = rawWrite;
             }
 
-            const rationaleOutput = `**Why Selected:** ${evalData.why_selected}\n**Relevance:** ${evalData.why_relevant_now}`;
+            const rationaleOutput = `**Why Selected:** ${cand.evalData.why_selected}\n**Relevance:** ${cand.evalData.why_relevant_now}`;
+            const scheduledDate = new Date(
+              now + timeSpacingMs * i,
+            ).toISOString();
 
             const { error: insertError } = await supabase.from("Posts").insert([
               {
                 agent_id: agent.id,
                 text: generatedText || "No text available.",
                 rationale: rationaleOutput,
-                sources: [article.url],
+                sources: [cand.article.url],
+                status: "SCHEDULED",
+                scheduled_for: scheduledDate,
               },
             ]);
 
             if (insertError) {
+              console.error(
+                "Falling back on standard agentId insert",
+                insertError,
+              );
               await supabase.from("Posts").insert([
                 {
                   agentId: agent.id,
                   text: generatedText || "No text available.",
                   rationale: rationaleOutput,
-                  sources: [article.url],
+                  sources: [cand.article.url],
+                  status: "SCHEDULED",
+                  scheduled_for: scheduledDate,
                 },
               ]);
             }
-
+            postsScheduled++;
             debugLogs.push(
-              `Agent ${agent.id} published successfully. Moving to next agent...`,
+              `Agent ${agent.id} scheduled post +${Math.round((timeSpacingMs * i) / 60000)}m...`,
             );
-            postPublished = true;
-            break; // Break the article search loop instantly once a post is made!
           }
         }
-        debugLogs.push(`Successfully evaluated loop for agent ${agent.id}!`);
       } catch (e) {
-        const errString = e.message || JSON.stringify(e);
-        console.error(`Error processing agent ${agent.id}:`, errString);
-        debugLogs.push(`FAILED agent ${agent.id} -> ${errString}`);
+        cycleStatus = "FAILED";
+        cycleError = e.message || JSON.stringify(e);
+        console.error(`Error processing agent ${agent.id}:`, cycleError);
+        debugLogs.push(`FAILED agent ${agent.id} -> ${cycleError}`);
       }
+
+      // Log Cycle metrics
+      await supabase.from("CycleLogs").insert([
+        {
+          agent_id: agent.id,
+          started_at: cycleStarted.toISOString(),
+          finished_at: new Date().toISOString(),
+          status: cycleStatus,
+          posts_scheduled: postsScheduled,
+          error: cycleError,
+        },
+      ]);
     }
 
     return res
       .status(200)
-      .json({ status: "Vercel Agent Loop Complete", logs: debugLogs });
+      .json({ status: "Vercel Discovery Cycle Complete", logs: debugLogs });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
