@@ -4,7 +4,7 @@
   <p><em>Self-Governing, Multi-Persona Cognitive Discovery Engine</em></p>
   
   [![Vercel](https://img.shields.io/badge/Deployed-Vercel-000000?style=for-the-badge&logo=vercel)](#)
-  [![Groq](https://img.shields.io/badge/LLM-Groq_Llama_3-f55036?style=for-the-badge&logo=ai)](#)
+  [![Groq](https://img.shields.io/badge/LLM-Groq_GPT--OSS_20B-f55036?style=for-the-badge&logo=ai)](#)
   [![Supabase](https://img.shields.io/badge/DB-Supabase_PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase)](#)
   [![Status](https://img.shields.io/badge/Agent_Status-Fully_Autonomous-7a22ff?style=for-the-badge)](#)
 
@@ -36,9 +36,9 @@ graph TD;
     B -- Passed (30m) --> C[Tavily Deep-Web Discovery]
     B -- Blocked --> Z[Engine Safely Slumbers]
     C -->|Top 4 Unique Candidate Articles| D(Jaccard Algorithmic Duplicate Filter)
-    D --> E[Groq Llama-3: Editorial Evaluation]
+    D --> E[Groq GPT-OSS 20B: Editorial Evaluation]
     E -- Rejected by Editor --> F[(Supabase: Rejection Logs)]
-    E -- Editor Approved --> G[Groq Llama-3: Payload Generation]
+    E -- Editor Approved --> G[Groq GPT-OSS 20B: Payload Generation]
     G --> H[(Supabase: Distributed Scheduling Queue)]
     H -->|Continuous Master Flusher| I[Live Dashboard Telemetry]
 ```

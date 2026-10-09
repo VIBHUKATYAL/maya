@@ -253,7 +253,7 @@ module.exports = async (req, res) => {
               evalResp = await fetchWithGroqFallback(
                 evalPrompt,
                 evalKeys,
-                "llama-3.1-8b-instant",
+                "openai/gpt-oss-20b",
                 true,
               );
             } catch (err) {
