@@ -54,7 +54,7 @@ module.exports = async (req, res) => {
         const writeResp = await fetchWithGroqFallback(
           payload.writePrompt,
           genKeys,
-          "llama-3.1-8b-instant",
+          "OpenAI GPT-OSS 20B",
           false,
         );
 

@@ -1,0 +1,287 @@
+{
+  "logs": [
+    {
+      "id": "aaccbedc-b9c3-41a7-93a9-b3d9d6a7878b",
+      "agent_id": "1a84dbaa-483a-404b-a4c8-d0066112c778",
+      "started_at": "2026-08-09T11:14:18.787+00:00",
+      "finished_at": "2026-08-09T11:14:33.681+00:00",
+      "status": "SUCCESS",
+      "posts_scheduled": 4,
+      "posts_published": 0,
+      "error": null,
+      "created_at": "2026-08-09T11:14:33.796681+00:00"
+    },
+    {
+      "id": "8b50c1a0-1f0b-4cbd-9462-1a977dd9e72d",
+      "agent_id": "edbdc3a5-b12e-4c7c-93e2-d7fbbe58879e",
+      "started_at": "2026-08-09T11:11:17.651+00:00",
+      "finished_at": "2026-08-09T11:11:53.451+00:00",
+      "status": "SUCCESS",
+      "posts_scheduled": 4,
+      "posts_published": 0,
+      "error": null,
+      "created_at": "2026-08-09T11:11:53.56479+00:00"
+    },
+    {
+      "id": "5441914b-b092-43b4-8096-24d378431a35",
+      "agent_id": "53c36dfd-f7a4-4786-a1bd-1e50950e72ca",
+      "started_at": "2026-08-09T11:09:50.45+00:00",
+      "finished_at": "2026-08-09T11:10:16.463+00:00",
+      "status": "SUCCESS",
+      "posts_scheduled": 4,
+      "posts_published": 0,
+      "error": null,
+      "created_at": "2026-08-09T11:10:16.580155+00:00"
+    },
+    {
+      "id": "15230037-025c-4c16-bad8-ba4852402b0f",
+      "agent_id": "31da1f58-e02f-4506-bce8-531cab807361",
+      "started_at": "2026-08-09T11:08:42.527+00:00",
+      "finished_at": "2026-08-09T11:09:11.626+00:00",
+      "status": "SUCCESS",
+      "posts_scheduled": 4,
+      "posts_published": 0,
+      "error": null,
+      "created_at": "2026-08-09T11:09:11.755436+00:00"
+    },
+    {
+      "id": "72ac85a1-a62f-42e3-b5f5-427eb601b582",
+      "agent_id": "61a4c83f-6000-473c-80fb-d1ff15dcb884",
+      "started_at": "2026-08-09T11:00:24.39+00:00",
+      "finished_at": "2026-08-09T11:00:41.205+00:00",
+      "status": "SUCCESS",
+      "posts_scheduled": 4,
+      "posts_published": 0,
+      "error": null,
+      "created_at": "2026-08-09T11:00:41.324602+00:00"
+    },
+    {
+      "id": "88db43dc-5208-4a29-be02-68d1cab4f42e",
+      "agent_id": "54752ef4-05f4-4800-812f-d439dbf36133",
+      "started_at": "2026-08-09T10:41:31.9+00:00",
+      "finished_at": "2026-08-09T10:42:06.88+00:00",
+      "status": "SUCCESS",
+      "posts_scheduled": 4,
+      "posts_published": 0,
+      "error": null,
+      "created_at": "2026-08-09T10:42:07.017306+00:00"
+    },
+    {
+      "id": "9af7f6fa-6aa7-4ce0-96cf-d4bac7612881",
+      "agent_id": "54752ef4-05f4-4800-812f-d439dbf36133",
+      "started_at": "2026-08-09T10:27:30.956+00:00",
+      "finished_at": "2026-08-09T10:27:46.558+00:00",
+      "status": "FAILED",
+      "posts_scheduled": 0,
+      "posts_published": 0,
+      "error": "All Groq keys exhausted deterministically due to rate limits. Last error: {\"message\":\"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kzhbzcche6wak66yqbzq13q8` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99156, Requested 1591. Please try again in 10m45.408s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}",
+      "created_at": "2026-08-09T10:27:46.699938+00:00"
+    },
+    {
+      "id": "8fb88f23-051b-44d8-a435-893325537497",
+      "agent_id": "54752ef4-05f4-4800-812f-d439dbf36133",
+      "started_at": "2026-08-09T10:27:05.257+00:00",
+      "finished_at": "2026-08-09T10:27:15.975+00:00",
+      "status": "FAILED",
+      "posts_scheduled": 0,
+      "posts_published": 0,
+      "error": "All Groq keys exhausted deterministically due to rate limits. Last error: {\"message\":\"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kzhbzcche6wak66yqbzq13q8` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99191, Requested 1824. Please try again in 14m36.959999999s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}",
+      "created_at": "2026-08-09T10:27:16.103644+00:00"
+    },
+    {
+      "id": "a27798e8-8d3a-4b20-87f2-53f3108dc011",
+      "agent_id": "54752ef4-05f4-4800-812f-d439dbf36133",
+      "started_at": "2026-08-09T10:25:39.326+00:00",
+      "finished_at": "2026-08-09T10:25:50.445+00:00",
+      "status": "FAILED",
+      "posts_scheduled": 0,
+      "posts_published": 0,
+      "error": "All Groq keys exhausted deterministically due to rate limits. Last error: {\"message\":\"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kzhbzcche6wak66yqbzq13q8` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99291, Requested 1584. Please try again in 12m36s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}",
+      "created_at": "2026-08-09T10:25:50.57161+00:00"
+    },
+    {
+      "id": "55d548e5-2f99-43f3-a408-d2679c27f2af",
+      "agent_id": "54752ef4-05f4-4800-812f-d439dbf36133",
+      "started_at": "2026-08-09T10:25:11.203+00:00",
+      "finished_at": "2026-08-09T10:25:24.384+00:00",
+      "status": "FAILED",
+      "posts_scheduled": 0,
+      "posts_published": 0,
+      "error": "All Groq keys exhausted deterministically due to rate limits. Last error: {\"message\":\"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kzhbzcche6wak66yqbzq13q8` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99321, Requested 1491. Please try again in 11m41.568s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}",
+      "created_at": "2026-08-09T10:25:24.513071+00:00"
+    },
+    {
+      "id": "3abf249f-1f4c-4077-af9e-0ae0246c8f0b",
+      "agent_id": "54752ef4-05f4-4800-812f-d439dbf36133",
+      "started_at": "2026-08-09T10:22:14.128+00:00",
+      "finished_at": "2026-08-09T10:22:26.964+00:00",
+      "status": "FAILED",
+      "posts_scheduled": 0,
+      "posts_published": 0,
+      "error": "All Groq keys exhausted deterministically due to rate limits. Last error: {\"message\":\"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kzhbzcche6wak66yqbzq13q8` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99526, Requested 1769. Please try again in 18m38.88s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}",
+      "created_at": "2026-08-09T10:22:27.095189+00:00"
+    },
+    {
+      "id": "2823b7c8-cf26-4f0d-9a9a-0466315ab201",
+      "agent_id": "54752ef4-05f4-4800-812f-d439dbf36133",
+      "started_at": "2026-08-09T10:20:23.942+00:00",
+      "finished_at": "2026-08-09T10:20:35.068+00:00",
+      "status": "FAILED",
+      "posts_scheduled": 0,
+      "posts_published": 0,
+      "error": "All Groq keys exhausted deterministically due to rate limits. Last error: {\"message\":\"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kwxyt6nde8a8d8pkfb4zhc8s` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99634, Requested 2039. Please try again in 24m5.471999999s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}",
+      "created_at": "2026-08-09T10:20:35.21361+00:00"
+    },
+    {
+      "id": "03403054-bea1-44c4-a861-d7af32458b7c",
+      "agent_id": "54752ef4-05f4-4800-812f-d439dbf36133",
+      "started_at": "2026-08-09T10:19:12.105+00:00",
+      "finished_at": "2026-08-09T10:19:25.909+00:00",
+      "status": "FAILED",
+      "posts_scheduled": 0,
+      "posts_published": 0,
+      "error": "All Groq keys exhausted deterministically due to rate limits. Last error: {\"message\":\"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kwxyt6nde8a8d8pkfb4zhc8s` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99714, Requested 1621. Please try again in 19m13.44s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}",
+      "created_at": "2026-08-09T10:19:26.048171+00:00"
+    },
+    {
+      "id": "4bc11e1c-c9a1-422e-a70c-cc490955387f",
+      "agent_id": "54752ef4-05f4-4800-812f-d439dbf36133",
+      "started_at": "2026-08-09T10:18:47.215+00:00",
+      "finished_at": "2026-08-09T10:19:03.586+00:00",
+      "status": "FAILED",
+      "posts_scheduled": 0,
+      "posts_published": 0,
+      "error": "All Groq keys exhausted deterministically due to rate limits. Last error: {\"message\":\"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kwxyt6nde8a8d8pkfb4zhc8s` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99740, Requested 1537. Please try again in 18m23.328s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}",
+      "created_at": "2026-08-09T10:19:03.727224+00:00"
+    },
+    {
+      "id": "93f4fa6b-63c7-4d62-b3d0-5697720ec198",
+      "agent_id": "016ff3a0-eb54-4d67-b775-d50074e0600b",
+      "started_at": "2026-08-09T10:17:29.178+00:00",
+      "finished_at": "2026-08-09T10:17:42.046+00:00",
+      "status": "FAILED",
+      "posts_scheduled": 0,
+      "posts_published": 0,
+      "error": "All Groq keys exhausted deterministically due to rate limits. Last error: {\"message\":\"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kzhbzcche6wak66yqbzq13q8` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 98268, Requested 2440. Please try again in 10m11.712s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}",
+      "created_at": "2026-08-09T10:17:42.160286+00:00"
+    },
+    {
+      "id": "28a09bdf-d5e0-467a-828c-1259f11fcfb2",
+      "agent_id": "016ff3a0-eb54-4d67-b775-d50074e0600b",
+      "started_at": "2026-08-09T10:14:16.03+00:00",
+      "finished_at": "2026-08-09T10:14:27.351+00:00",
+      "status": "FAILED",
+      "posts_scheduled": 0,
+      "posts_published": 0,
+      "error": "All Groq keys exhausted deterministically due to rate limits. Last error: {\"message\":\"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kzhbzcche6wak66yqbzq13q8` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 98494, Requested 2508. Please try again in 14m25.728s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}",
+      "created_at": "2026-08-09T10:14:27.484455+00:00"
+    },
+    {
+      "id": "03178620-3681-4311-b32c-8dd0caa68e35",
+      "agent_id": "016ff3a0-eb54-4d67-b775-d50074e0600b",
+      "started_at": "2026-08-09T10:10:10.668+00:00",
+      "finished_at": "2026-08-09T10:10:22.878+00:00",
+      "status": "FAILED",
+      "posts_scheduled": 0,
+      "posts_published": 0,
+      "error": "All Groq keys exhausted deterministically due to rate limits. Last error: {\"message\":\"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kzhbzcche6wak66yqbzq13q8` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 98777, Requested 2582. Please try again in 19m34.176s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}",
+      "created_at": "2026-08-09T10:10:23.006263+00:00"
+    },
+    {
+      "id": "77345fb4-ba17-4c54-a092-eab071b53c41",
+      "agent_id": "016ff3a0-eb54-4d67-b775-d50074e0600b",
+      "started_at": "2026-08-09T10:04:05.832+00:00",
+      "finished_at": "2026-08-09T10:04:33.848+00:00",
+      "status": "FAILED",
+      "posts_scheduled": 2,
+      "posts_published": 0,
+      "error": "All Groq keys exhausted deterministically due to rate limits. Last error: {\"message\":\"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kzhbzcche6wak66yqbzq13q8` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99181, Requested 1909. Please try again in 15m41.76s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}",
+      "created_at": "2026-08-09T10:04:33.978086+00:00"
+    },
+    {
+      "id": "9a792d52-5004-448d-bf77-a04409dc939b",
+      "agent_id": "016ff3a0-eb54-4d67-b775-d50074e0600b",
+      "started_at": "2026-08-09T10:02:25.354+00:00",
+      "finished_at": "2026-08-09T10:02:48.778+00:00",
+      "status": "FAILED",
+      "posts_scheduled": 0,
+      "posts_published": 0,
+      "error": "All Groq keys exhausted deterministically due to rate limits. Last error: {\"message\":\"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kwxyt6nde8a8d8pkfb4zhc8s` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 98827, Requested 1641. Please try again in 6m44.352s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}",
+      "created_at": "2026-08-09T10:02:48.913254+00:00"
+    },
+    {
+      "id": "2c3b2953-5b78-46b5-8e75-065b7e0967a6",
+      "agent_id": "016ff3a0-eb54-4d67-b775-d50074e0600b",
+      "started_at": "2026-08-09T10:00:41.291+00:00",
+      "finished_at": "2026-08-09T10:01:02.665+00:00",
+      "status": "FAILED",
+      "posts_scheduled": 0,
+      "posts_published": 0,
+      "error": "All Groq keys exhausted deterministically due to rate limits. Last error: {\"message\":\"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kwxyt6nde8a8d8pkfb4zhc8s` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 98950, Requested 3160. Please try again in 30m23.04s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}",
+      "created_at": "2026-08-09T10:01:03.173162+00:00"
+    }
+  ],
+  "posts": [
+    {
+      "id": "5afb9a41-1ec7-4abc-81dd-8bb5ec63b998",
+      "status": "PUBLISHED",
+      "scheduled_for": "2026-08-09T11:36:56.813+00:00",
+      "created_at": "2026-08-09T11:14:33.577419+00:00"
+    },
+    {
+      "id": "65d0c825-2744-4404-8ff6-f397942ada80",
+      "status": "PUBLISHED",
+      "scheduled_for": "2026-08-09T11:29:26.813+00:00",
+      "created_at": "2026-08-09T11:14:31.818448+00:00"
+    },
+    {
+      "id": "8f9b58d4-d113-442b-859a-f1c83448b3af",
+      "status": "PUBLISHED",
+      "scheduled_for": "2026-08-09T11:21:56.813+00:00",
+      "created_at": "2026-08-09T11:14:30.236697+00:00"
+    },
+    {
+      "id": "e887c799-7cb8-4e5f-bdc8-add7a2c8de98",
+      "status": "PUBLISHED",
+      "scheduled_for": "2026-08-09T11:14:26.813+00:00",
+      "created_at": "2026-08-09T11:14:28.567618+00:00"
+    },
+    {
+      "id": "cc512e25-15c2-4fe2-8f01-fb88fa34442e",
+      "status": "PUBLISHED",
+      "scheduled_for": "2026-08-09T11:34:11.068+00:00",
+      "created_at": "2026-08-09T11:11:53.345734+00:00"
+    },
+    {
+      "id": "6a3fcf24-e7e8-4397-bbd6-570ffd15c085",
+      "status": "PUBLISHED",
+      "scheduled_for": "2026-08-09T11:26:41.068+00:00",
+      "created_at": "2026-08-09T11:11:50.094016+00:00"
+    },
+    {
+      "id": "6bf8c513-af40-44e3-980c-269fd1c9804a",
+      "status": "PUBLISHED",
+      "scheduled_for": "2026-08-09T11:19:11.068+00:00",
+      "created_at": "2026-08-09T11:11:47.314845+00:00"
+    },
+    {
+      "id": "a9d7c0d0-35c6-4b69-8e2d-c0c36d6c494c",
+      "status": "PUBLISHED",
+      "scheduled_for": "2026-08-09T11:11:41.068+00:00",
+      "created_at": "2026-08-09T11:11:44.441761+00:00"
+    },
+    {
+      "id": "bfd65cb0-1650-4286-9113-13c70f5886c3",
+      "status": "REJECTED",
+      "scheduled_for": "2026-08-09T11:11:39.349568+00:00",
+      "created_at": "2026-08-09T11:11:39.349568+00:00"
+    },
+    {
+      "id": "0d83fd2c-9c5b-4d70-aaa1-a19e2e2aee29",
+      "status": "REJECTED",
+      "scheduled_for": "2026-08-09T11:11:37.773634+00:00",
+      "created_at": "2026-08-09T11:11:37.773634+00:00"
+    }
+  ],
+  "postErr": null
+}

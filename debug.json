@@ -1,0 +1,101 @@
+{
+  "logs": [
+    {
+      "id": "b98f7561-3c7b-4ebc-94d9-35f3539b628b",
+      "agent_id": "31da1f58-e02f-4506-bce8-531cab807361",
+      "started_at": "2026-08-09T12:12:52.906+00:00",
+      "finished_at": "2026-08-09T12:13:51.138+00:00",
+      "status": "FAILED",
+      "posts_scheduled": 0,
+      "posts_published": 0,
+      "error": "API Rate Limit Exhaustion during Evaluation",
+      "created_at": "2026-08-09T12:13:51.282602+00:00"
+    },
+    {
+      "id": "9d550832-6cb2-4a5f-b3db-4c9bbb783f88",
+      "agent_id": "1a84dbaa-483a-404b-a4c8-d0066112c778",
+      "started_at": "2026-08-09T12:11:03.086+00:00",
+      "finished_at": "2026-08-09T12:11:43.132+00:00",
+      "status": "FAILED",
+      "posts_scheduled": 1,
+      "posts_published": 0,
+      "error": "API Rate Limit Exhaustion during Evaluation",
+      "created_at": "2026-08-09T12:11:43.247426+00:00"
+    },
+    {
+      "id": "93743750-534d-45f0-887b-954ada73c024",
+      "agent_id": "31da1f58-e02f-4506-bce8-531cab807361",
+      "started_at": "2026-08-09T11:55:11.083+00:00",
+      "finished_at": "2026-08-09T11:56:10.318+00:00",
+      "status": "SUCCESS",
+      "posts_scheduled": 0,
+      "posts_published": 0,
+      "error": null,
+      "created_at": "2026-08-09T11:56:10.420135+00:00"
+    },
+    {
+      "id": "8a2c3379-8c84-4882-b701-c9cc4279db43",
+      "agent_id": "1a84dbaa-483a-404b-a4c8-d0066112c778",
+      "started_at": "2026-08-09T11:54:07.259+00:00",
+      "finished_at": "2026-08-09T11:54:58.268+00:00",
+      "status": "SUCCESS",
+      "posts_scheduled": 1,
+      "posts_published": 0,
+      "error": null,
+      "created_at": "2026-08-09T11:54:58.410032+00:00"
+    },
+    {
+      "id": "bede5037-974c-4a0e-ae20-a5985265066b",
+      "agent_id": "53c36dfd-f7a4-4786-a1bd-1e50950e72ca",
+      "started_at": "2026-08-09T11:53:00.123+00:00",
+      "finished_at": "2026-08-09T11:53:47.359+00:00",
+      "status": "SUCCESS",
+      "posts_scheduled": 1,
+      "posts_published": 0,
+      "error": null,
+      "created_at": "2026-08-09T11:53:47.473031+00:00"
+    }
+  ],
+  "posts": [
+    {
+      "id": "143af372-0802-45b2-a22f-5020ce6f4b51",
+      "status": "REJECTED",
+      "scheduled_for": "2026-08-09T12:13:51.032731+00:00",
+      "created_at": "2026-08-09T12:13:51.032731+00:00",
+      "text": "[REJECTED]\n**Topic:** Chinese startup Moonshot's AI model breaks out of testing environment ...\n\n**Why Rejected:** ⚠️ Groq API Rate Limit Completely Exhausted! The LLM engine failed to evaluate this candidate natively because your token buckets are empty. Switch to a smaller model or add more keys.",
+      "rationale": "API Rate Limit Exhaustion"
+    },
+    {
+      "id": "c3744c55-7de3-40e9-b400-be6317d99afc",
+      "status": "REJECTED",
+      "scheduled_for": "2026-08-09T12:13:40.516216+00:00",
+      "created_at": "2026-08-09T12:13:40.516216+00:00",
+      "text": "[REJECTED]\n**Topic:** AI Safety Watchdog Warns of Unsanctioned Cyberattacks by OpenAI and Anthropic Models\n\n**Why Rejected:** Duplicate Content",
+      "rationale": "Duplicate Content"
+    },
+    {
+      "id": "238a5687-8c57-4cec-9949-fd8b15206b8f",
+      "status": "REJECTED",
+      "scheduled_for": "2026-08-09T12:13:35.160941+00:00",
+      "created_at": "2026-08-09T12:13:35.160941+00:00",
+      "text": "[REJECTED]\n**Topic:** AGI/Singularity: 10,000 Predictions Analyzed\n\n**Why Rejected:** Duplicate Content, as it heavily overlaps with a PREVIOUSLY PUBLISHED topic",
+      "rationale": "Duplicate Content, as it heavily overlaps with a PREVIOUSLY PUBLISHED topic"
+    },
+    {
+      "id": "ed351ca1-e4a2-448e-9a5c-36668e6044d5",
+      "status": "REJECTED",
+      "scheduled_for": "2026-08-09T12:13:32.496814+00:00",
+      "created_at": "2026-08-09T12:13:32.496814+00:00",
+      "text": "[REJECTED]\n**Topic:** [The AI Show Episode 228]: More Rogue AI Agents, AI Lab Staff Ask Washington to Pace Development, Continuing Battle Over Open Weights & OpenAI Previews Astra\n\n**Why Rejected:** ⚠️ Groq API Rate Limit Completely Exhausted! The LLM engine failed to evaluate this candidate natively because your token buckets are empty. Switch to a smaller model or add more keys.",
+      "rationale": "API Rate Limit Exhaustion"
+    },
+    {
+      "id": "94b72cfa-1cca-4944-9242-fd61580daedd",
+      "status": "REJECTED",
+      "scheduled_for": "2026-08-09T12:13:22.070207+00:00",
+      "created_at": "2026-08-09T12:13:22.070207+00:00",
+      "text": "[REJECTED]\n**Topic:** 7.30 - Facebook\n\n**Why Rejected:** Duplicate Content",
+      "rationale": "Duplicate Content"
+    }
+  ]
+}
